@@ -67,18 +67,30 @@ export default function App() {
   const [gameData, setGameData] = useState(() => {
     try {
       const saved = localStorage.getItem('archero2_game_data');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.version === DEFAULT_GAME_DATA.version) return parsed;
+      }
     } catch (e) {
       console.error('Failed to parse saved game data:', e);
     }
     return DEFAULT_GAME_DATA;
   });
 
-  // Спорядження користувача
+  // Спорядження користувача (з валідацією рідкостей)
   const [equipmentItems, setEquipmentItems] = useState(() => {
     try {
       const saved = localStorage.getItem('archero2_equipment_items');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const validTierIds = DEFAULT_GAME_DATA.equipment.tiers.map(t => t.id);
+        const sanitized = parsed.map(it => ({
+          ...it,
+          currentTier: validTierIds.includes(it.currentTier) ? it.currentTier : 'gold_2',
+          targetTier: validTierIds.includes(it.targetTier) ? it.targetTier : 'gold_3'
+        }));
+        return sanitized;
+      }
     } catch (e) {}
     return INITIAL_EQUIPMENT;
   });

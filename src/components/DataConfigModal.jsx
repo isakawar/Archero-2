@@ -193,17 +193,18 @@ export default function DataConfigModal({ gameData, onSave, onReset, onClose }) 
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                   <thead>
                     <tr style={{ background: 'var(--bg-input)', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
-                      <th style={{ padding: '10px 12px' }}>Рівень (Поточний)</th>
-                      <th style={{ padding: '10px 12px' }}>Копій</th>
+                      <th style={{ padding: '10px 12px' }}>Крок (Перехід)</th>
+                      <th style={{ padding: '10px 12px' }}>Правило</th>
+                      <th style={{ padding: '10px 12px' }}>Таких же копій</th>
+                      <th style={{ padding: '10px 12px' }}>Будь-який корм</th>
                       <th style={{ padding: '10px 12px' }}>Золото (Gold)</th>
                       <th style={{ padding: '10px 12px' }}>Сувої (Scrolls)</th>
-                      <th style={{ padding: '10px 12px' }}>Інші ресурси</th>
                     </tr>
                   </thead>
                   <tbody>
                     {localData.equipment.tiers.slice(0, -1).map((tier, idx) => {
                       const nextTier = localData.equipment.tiers[idx + 1];
-                      const req = localData.equipment.stepRequirements[tier.id] || { copies: 2, gold: 100000, scrolls: 50, other: 0 };
+                      const req = localData.equipment.stepRequirements[tier.id] || { sameCopies: 2, fodderCopies: 0, gold: 100000, scrolls: 50 };
                       return (
                         <tr key={tier.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                           <td style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -211,13 +212,25 @@ export default function DataConfigModal({ gameData, onSave, onReset, onClose }) 
                             <span style={{ color: 'var(--text-muted)', margin: '0 6px' }}>→</span>
                             <span style={{ color: nextTier.color }}>{nextTier.label}</span>
                           </td>
+                          <td style={{ padding: '6px 12px', fontSize: '0.78rem', color: 'var(--accent-gold)' }}>
+                            {req.description || `${req.sameCopies || 0} таких же, ${req.fodderCopies || 0} корм`}
+                          </td>
                           <td style={{ padding: '6px 12px' }}>
                             <input
                               type="number"
                               min="0"
-                              value={req.copies}
-                              onChange={e => handleEquipmentStepChange(tier.id, 'copies', e.target.value)}
-                              style={{ width: '70px', padding: '6px 8px' }}
+                              value={req.sameCopies !== undefined ? req.sameCopies : (req.copies || 0)}
+                              onChange={e => handleEquipmentStepChange(tier.id, 'sameCopies', e.target.value)}
+                              style={{ width: '65px', padding: '6px 8px' }}
+                            />
+                          </td>
+                          <td style={{ padding: '6px 12px' }}>
+                            <input
+                              type="number"
+                              min="0"
+                              value={req.fodderCopies || 0}
+                              onChange={e => handleEquipmentStepChange(tier.id, 'fodderCopies', e.target.value)}
+                              style={{ width: '65px', padding: '6px 8px' }}
                             />
                           </td>
                           <td style={{ padding: '6px 12px' }}>
@@ -227,7 +240,7 @@ export default function DataConfigModal({ gameData, onSave, onReset, onClose }) 
                               step="5000"
                               value={req.gold}
                               onChange={e => handleEquipmentStepChange(tier.id, 'gold', e.target.value)}
-                              style={{ width: '110px', padding: '6px 8px' }}
+                              style={{ width: '100px', padding: '6px 8px' }}
                             />
                           </td>
                           <td style={{ padding: '6px 12px' }}>
@@ -236,16 +249,7 @@ export default function DataConfigModal({ gameData, onSave, onReset, onClose }) 
                               min="0"
                               value={req.scrolls}
                               onChange={e => handleEquipmentStepChange(tier.id, 'scrolls', e.target.value)}
-                              style={{ width: '70px', padding: '6px 8px' }}
-                            />
-                          </td>
-                          <td style={{ padding: '6px 12px' }}>
-                            <input
-                              type="number"
-                              min="0"
-                              value={req.other || 0}
-                              onChange={e => handleEquipmentStepChange(tier.id, 'other', e.target.value)}
-                              style={{ width: '70px', padding: '6px 8px' }}
+                              style={{ width: '65px', padding: '6px 8px' }}
                             />
                           </td>
                         </tr>

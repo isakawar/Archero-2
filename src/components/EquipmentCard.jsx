@@ -333,7 +333,15 @@ export default function EquipmentCard({
                 ПОТРІБНО (REQUIRED)
               </div>
               <div style={{ fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div>• {item.name} × <strong>{activeRequired.copies}</strong></div>
+                {activeRequired.sameCopies > 0 && (
+                  <div>• {item.name} × <strong style={{ color: '#ffb300' }}>{activeRequired.sameCopies}</strong> <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>(таких же)</span></div>
+                )}
+                {activeRequired.fodderCopies > 0 && (
+                  <div>• Корм × <strong style={{ color: 'var(--accent-purple)' }}>{activeRequired.fodderCopies}</strong> <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>(будь-який {activeRequired.fodderRarity || ''})</span></div>
+                )}
+                {(!activeRequired.sameCopies && !activeRequired.fodderCopies) && (
+                  <div>• {item.name} × <strong>{activeRequired.copies}</strong></div>
+                )}
                 <div>• Gold × <strong>{formatNumber(activeRequired.gold)}</strong></div>
                 {activeRequired.scrolls > 0 && (
                   <div>• Scrolls × <strong>{formatNumber(activeRequired.scrolls)}</strong></div>
@@ -355,9 +363,14 @@ export default function EquipmentCard({
                 У ВАС (YOU HAVE)
               </div>
               <div style={{ fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div style={{ color: userOwned.copies >= activeRequired.copies ? 'var(--status-ready-text)' : 'inherit' }}>
+                <div style={{ color: userOwned.copies >= (activeRequired.sameCopies || activeRequired.copies) ? 'var(--status-ready-text)' : 'inherit' }}>
                   • {item.name} × <strong>{userOwned.copies}</strong>
                 </div>
+                {activeRequired.fodderCopies > 0 && (
+                  <div style={{ color: userOwned.fodderCopies >= activeRequired.fodderCopies ? 'var(--status-ready-text)' : 'inherit' }}>
+                    • Корм × <strong>{userOwned.fodderCopies}</strong>
+                  </div>
+                )}
                 <div style={{ color: userOwned.gold >= activeRequired.gold ? 'var(--status-ready-text)' : 'inherit' }}>
                   • Gold × <strong>{formatNumber(userOwned.gold)}</strong>
                 </div>
@@ -396,13 +409,33 @@ export default function EquipmentCard({
                   </div>
                 ) : (
                   <>
-                    {missingResult.missing.copies > 0 ? (
+                    {activeRequired.sameCopies > 0 && (
+                      missingResult.missing.sameCopies > 0 ? (
+                        <div style={{ color: '#ef4444', fontWeight: 600 }}>
+                          ✕ {item.name} × {missingResult.missing.sameCopies}
+                        </div>
+                      ) : (
+                        <div style={{ color: 'var(--status-ready-text)', fontSize: '0.78rem' }}>
+                          ✓ {item.name} копій достатньо
+                        </div>
+                      )
+                    )}
+
+                    {activeRequired.fodderCopies > 0 && (
+                      missingResult.missing.fodderCopies > 0 ? (
+                        <div style={{ color: '#ef4444', fontWeight: 600 }}>
+                          ✕ Корм ({activeRequired.fodderRarity || 'будь-який'}) × {missingResult.missing.fodderCopies}
+                        </div>
+                      ) : (
+                        <div style={{ color: 'var(--status-ready-text)', fontSize: '0.78rem' }}>
+                          ✓ Корму достатньо
+                        </div>
+                      )
+                    )}
+
+                    {(!activeRequired.sameCopies && !activeRequired.fodderCopies && missingResult.missing.copies > 0) && (
                       <div style={{ color: '#ef4444', fontWeight: 600 }}>
                         ✕ {item.name} × {missingResult.missing.copies}
-                      </div>
-                    ) : (
-                      <div style={{ color: 'var(--status-ready-text)', fontSize: '0.78rem' }}>
-                        ✓ {item.name} копій достатньо
                       </div>
                     )}
 

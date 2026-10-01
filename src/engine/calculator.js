@@ -8,27 +8,16 @@
  * ============================================================================
  */
 
-/**
- * Знаходить об'єкт рівня за його id
- */
 export function getEquipmentTier(tierId, gameData) {
   return gameData?.equipment?.tiers?.find(t => t.id === tierId) || null;
 }
 
-/**
- * Отримує індекс рівня у списку рідкостей
- */
 export function getEquipmentTierIndex(tierId, gameData) {
   return gameData?.equipment?.tiers?.findIndex(t => t.id === tierId) ?? -1;
 }
 
 /**
  * 1. Розраховує покроковий ланцюг прокачки (Upgrade Chain)
- * @param {string|number} fromId Поточний рівень/рідкість
- * @param {string|number} toId Цільовий рівень/рідкість
- * @param {'equipment'|'runes'} type Тип прокачки
- * @param {object} gameData Конфіг гри
- * @returns {object} { isValid, isAlreadyAtTarget, steps: Array<{from, to, required}> }
  */
 export function calculateUpgradeChain(fromId, toId, type = 'equipment', gameData) {
   if (type === 'equipment') {
@@ -56,12 +45,21 @@ export function calculateUpgradeChain(fromId, toId, type = 'equipment', gameData
       const nextTier = tiers[i + 1];
       const req = stepReqs[currentTier.id] || { copies: 1, gold: 10000, scrolls: 10, other: 0 };
 
+      const sameCopies = Math.max(0, Number(req.sameCopies !== undefined ? req.sameCopies : req.copies) || 0);
+      const fodderCopies = Math.max(0, Number(req.fodderCopies) || 0);
+      const totalCopies = sameCopies + fodderCopies;
+
       steps.push({
         stepIndex: i - fromIndex + 1,
         from: currentTier,
         to: nextTier,
+        description: req.description || `${totalCopies} копій`,
         required: {
-          copies: Math.max(0, Number(req.copies) || 0),
+          copies: totalCopies,
+          sameCopies,
+          sameRarity: req.sameRarity || currentTier.label,
+          fodderCopies,
+          fodderRarity: req.fodderRarity || '',
           gold: Math.max(0, Number(req.gold) || 0),
           scrolls: Math.max(0, Number(req.scrolls) || 0),
           other: Math.max(0, Number(req.other) || 0)
@@ -113,11 +111,6 @@ export function calculateUpgradeChain(fromId, toId, type = 'equipment', gameData
 
 /**
  * 2. Розраховує сумарну вартість прокачки до цілі та першого кроку
- * @param {string|number} fromId Поточний рівень
- * @param {string|number} toId Цільовий рівень
- * @param {'equipment'|'runes'} type Тип
- * @param {object} gameData Конфіг гри
- * @returns {object} { isValid, isAlreadyAtTarget, totalRequired, nextStepRequired, stepsCount, steps }
  */
 export function calculateUpgradeCost(fromId, toId, type = 'equipment', gameData) {
   const chainResult = calculateUpgradeChain(fromId, toId, type, gameData);
@@ -130,7 +123,7 @@ export function calculateUpgradeCost(fromId, toId, type = 'equipment', gameData)
       stepsCount: 0,
       steps: [],
       totalRequired: type === 'equipment' 
-        ? { copies: 0, gold: 0, scrolls: 0, other: 0 }
+        ? { copies: 0, sameCopies: 0, fodderCopies: 0, gold: 0, scrolls: 0, other: 0 }
         : { fragments: 0, gold: 0, runeDust: 0 },
       nextStepRequired: null
     };
@@ -143,12 +136,14 @@ export function calculateUpgradeCost(fromId, toId, type = 'equipment', gameData)
     const totalRequired = steps.reduce(
       (acc, step) => {
         acc.copies += step.required.copies;
+        acc.sameCopies += step.required.sameCopies;
+        acc.fodderCopies += step.required.fodderCopies;
         acc.gold += step.required.gold;
         acc.scrolls += step.required.scrolls;
         acc.other += step.required.other;
         return acc;
       },
-      { copies: 0, gold: 0, scrolls: 0, other: 0 }
+      { copies: 0, sameCopies: 0, fodderCopies: 0, gold: 0, scrolls: 0, other: 0 }
     );
 
     return {
@@ -187,9 +182,6 @@ export function calculateUpgradeCost(fromId, toId, type = 'equipment', gameData)
 
 /**
  * 3. Розраховує різницю (Missing Resources) між потрібним і наявним
- * @param {object} required Потрібні ресурси { [resourceKey]: number }
- * @param {object} owned Наявні ресурси { [resourceKey]: number }
- * @returns {object} { missing, status, allSufficient, partialCount, missingCount }
  */
 export function calculateMissingResources(required = {}, owned = {}) {
   const missing = {};
@@ -199,6 +191,9 @@ export function calculateMissingResources(required = {}, owned = {}) {
   let missingCount = 0;
 
   for (const key of Object.keys(required)) {
+    // Пропускаємо текстові мета-поля
+    if (key === 'sameRarity' || key === 'fodderRarity') continue;
+
     const req = Math.max(0, Number(required[key]) || 0);
     const own = Math.max(0, Number(owned[key]) || 0);
     const diff = Math.max(0, req - own);
@@ -229,13 +224,12 @@ export function calculateMissingResources(required = {}, owned = {}) {
 
 /**
  * 4. Розраховує прогрес прокачки у відсотках (0% - 100%)
- * Розраховується як середньозважений або гармонійний показник готовності всіх необхідних ресурсів.
- * @param {object} required Потрібні ресурси
- * @param {object} owned Наявні ресурси
- * @returns {number} Відсоток від 0 до 100
  */
 export function calculateProgress(required = {}, owned = {}) {
-  const keys = Object.keys(required).filter(k => (Number(required[k]) || 0) > 0);
+  const keys = Object.keys(required).filter(k => {
+    if (k === 'sameRarity' || k === 'fodderRarity') return false;
+    return (Number(required[k]) || 0) > 0;
+  });
 
   if (keys.length === 0) return 100;
 
@@ -253,28 +247,26 @@ export function calculateProgress(required = {}, owned = {}) {
 
 /**
  * 5. Розраховує загальний сумарний план прокачки (Масовий калькулятор)
- * @param {Array<object>} equipmentItems Список предметів користувача
- * @param {Array<object>} runeItems Список рун користувача
- * @param {object} globalResources Глобальні ресурси (gold, scrolls, etc.)
- * @param {object} gameData Конфіг гри
- * @returns {object} Деталізований звіт планів, суми та загальний статус
  */
 export function calculateTotalPlan(equipmentItems = [], runeItems = [], globalResources = {}, gameData) {
   let totalGoldRequired = 0;
   let totalCopiesRequired = 0;
+  let totalSameCopiesRequired = 0;
+  let totalFodderCopiesRequired = 0;
   let totalScrollsRequired = 0;
   let totalOtherRequired = 0;
   let totalFragmentsRequired = 0;
   let totalRuneDustRequired = 0;
 
-  // Деталізація по кожному предмету
   const equipmentPlan = equipmentItems.map(item => {
     const cost = calculateUpgradeCost(item.currentTier, item.targetTier, 'equipment', gameData);
     const ownedCopies = Math.max(0, Number(item.ownedCopies) || 0);
-    
-    // Специфічні ресурси для цього предмета
+    const ownedFodder = Math.max(0, Number(globalResources.fodderEquipment || 0));
+
     const itemOwned = {
       copies: ownedCopies,
+      sameCopies: ownedCopies,
+      fodderCopies: ownedFodder,
       gold: Math.max(0, Number(globalResources.gold) || 0),
       scrolls: Math.max(0, Number(globalResources[`scrolls_${item.slot}`] || globalResources.scrolls) || 0),
       other: Math.max(0, Number(globalResources.other) || 0)
@@ -291,6 +283,8 @@ export function calculateTotalPlan(equipmentItems = [], runeItems = [], globalRe
     if (cost.isValid) {
       totalGoldRequired += cost.totalRequired.gold;
       totalCopiesRequired += cost.totalRequired.copies;
+      totalSameCopiesRequired += cost.totalRequired.sameCopies;
+      totalFodderCopiesRequired += cost.totalRequired.fodderCopies;
       totalScrollsRequired += cost.totalRequired.scrolls;
       totalOtherRequired += cost.totalRequired.other;
     }
@@ -304,7 +298,6 @@ export function calculateTotalPlan(equipmentItems = [], runeItems = [], globalRe
     };
   });
 
-  // Деталізація по кожній руні
   const runePlan = runeItems.map(rune => {
     const cost = calculateUpgradeCost(rune.currentLevel, rune.targetLevel, 'runes', gameData);
     const ownedFragments = Math.max(0, Number(rune.ownedFragments) || 0);
@@ -341,6 +334,8 @@ export function calculateTotalPlan(equipmentItems = [], runeItems = [], globalRe
   const totalRequired = {
     gold: totalGoldRequired,
     copies: totalCopiesRequired,
+    sameCopies: totalSameCopiesRequired,
+    fodderCopies: totalFodderCopiesRequired,
     scrolls: totalScrollsRequired,
     fragments: totalFragmentsRequired,
     runeDust: totalRuneDustRequired,
@@ -350,6 +345,8 @@ export function calculateTotalPlan(equipmentItems = [], runeItems = [], globalRe
   const totalOwned = {
     gold: Math.max(0, Number(globalResources.gold) || 0),
     copies: equipmentItems.reduce((acc, it) => acc + (Number(it.ownedCopies) || 0), 0),
+    sameCopies: equipmentItems.reduce((acc, it) => acc + (Number(it.ownedCopies) || 0), 0),
+    fodderCopies: Math.max(0, Number(globalResources.fodderEquipment || 0)),
     scrolls: Math.max(0, Number(globalResources.scrolls) || 0),
     fragments: runeItems.reduce((acc, rn) => acc + (Number(rn.ownedFragments) || 0), 0),
     runeDust: Math.max(0, Number(globalResources.runeDust) || 0),
@@ -372,28 +369,39 @@ export function calculateTotalPlan(equipmentItems = [], runeItems = [], globalRe
 
 /**
  * 6. "Що мені зараз фармити?" (Farming Priority)
- * Перетворює дефіцит ресурсів у зрозумілий пріоритетний список.
- * @param {object} totalPlan Результат функції calculateTotalPlan
- * @returns {Array<object>} Впорядкований список для фарму
  */
 export function getFarmingPriority(totalPlan) {
   if (!totalPlan) return [];
 
   const priorities = [];
 
-  // 1. Копії конкретних предметів (найважливіший ресурс)
+  // 1. Копії конкретних предметів
   for (const p of totalPlan.equipmentPlan || []) {
     if (p.cost?.isValid && p.missingResult) {
-      const missingCopies = p.missingResult.missing.copies || 0;
-      if (missingCopies > 0) {
+      const missingSameCopies = p.missingResult.missing.sameCopies ?? p.missingResult.missing.copies ?? 0;
+      if (missingSameCopies > 0) {
         priorities.push({
           type: 'copies',
-          name: `${p.item.name || 'Equipment'} copies`,
+          name: `${p.item.name || 'Equipment'} (копії)`,
           icon: p.item.icon || '⚔️',
           slot: p.item.slot,
-          need: missingCopies,
+          need: missingSameCopies,
           unit: 'копій',
           priority: 1
+        });
+      }
+
+      // Корм (Fodder items)
+      const missingFodder = p.missingResult.missing.fodderCopies || 0;
+      if (missingFodder > 0) {
+        priorities.push({
+          type: 'fodder',
+          name: `Корм для ${p.item.name} (будь-яке спорядження)`,
+          icon: '📦',
+          slot: p.item.slot,
+          need: missingFodder,
+          unit: 'предметів',
+          priority: 2
         });
       }
     }
@@ -406,17 +414,17 @@ export function getFarmingPriority(totalPlan) {
       if (missingFrags > 0) {
         priorities.push({
           type: 'fragments',
-          name: `${p.rune.name || 'Rune'} fragments`,
+          name: `${p.rune.name || 'Rune'} (фрагменти)`,
           icon: p.rune.icon || '🔮',
           need: missingFrags,
           unit: 'фрагментів',
-          priority: 2
+          priority: 3
         });
       }
     }
   }
 
-  // 3. Сумарні сувої (Scrolls)
+  // 3. Сувої (Scrolls)
   const missingScrolls = totalPlan.globalMissing?.missing?.scrolls || 0;
   if (missingScrolls > 0) {
     priorities.push({
@@ -425,7 +433,7 @@ export function getFarmingPriority(totalPlan) {
       icon: '📜',
       need: missingScrolls,
       unit: 'шт.',
-      priority: 3
+      priority: 4
     });
   }
 
@@ -438,11 +446,11 @@ export function getFarmingPriority(totalPlan) {
       icon: '🪙',
       need: missingGold,
       unit: 'золота',
-      priority: 4
+      priority: 5
     });
   }
 
-  // 5. Інші ресурси (Rune Dust / Other)
+  // 5. Інші ресурси
   const missingRuneDust = totalPlan.globalMissing?.missing?.runeDust || 0;
   if (missingRuneDust > 0) {
     priorities.push({
@@ -451,37 +459,18 @@ export function getFarmingPriority(totalPlan) {
       icon: '✨',
       need: missingRuneDust,
       unit: 'шт.',
-      priority: 5
-    });
-  }
-
-  const missingOther = totalPlan.globalMissing?.missing?.other || 0;
-  if (missingOther > 0) {
-    priorities.push({
-      type: 'other',
-      name: 'Special Materials (Особливі ресурси)',
-      icon: '💎',
-      need: missingOther,
-      unit: 'шт.',
       priority: 6
     });
   }
 
-  // Сортуємо за пріоритетом
   return priorities.sort((a, b) => a.priority - b.priority);
 }
 
-/**
- * Допоміжна функція форматування чисел (наприклад 1150000 -> "1,150,000" або "1.15M")
- */
 export function formatNumber(num) {
   if (num === null || num === undefined || isNaN(num)) return '0';
   return Number(num).toLocaleString('en-US');
 }
 
-/**
- * Компактне форматування для бейджів (1.2k, 1.5M)
- */
 export function formatCompact(num) {
   if (num === null || num === undefined || isNaN(num)) return '0';
   const n = Number(num);

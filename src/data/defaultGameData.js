@@ -1,72 +1,160 @@
 /**
  * ============================================================================
- * ARCHERO 2 - GAME UPGRADE DATA (MOCK DATA)
+ * ARCHERO 2 - GAME UPGRADE DATA
  * ============================================================================
  * 
- * ВАЖЛИВО:
- * Усі значення тут є тестовими (MOCK DATA) для демонстрації логіки.
- * Ви можете легко змінити будь-які вартості, рівні, ресурси або назви прямо тут
- * або через інтерфейс у вкладці "[⚙️ Дані прокачки]".
+ * Точна таблиця злиття (Fusion / Upgrade) для спорядження за офіційною схемою гри:
  * 
- * Структура:
- * - equipment.tiers: послідовність рідкостей / рівнів спорядження
- * - equipment.steps: вартість переходу з кожного рівня на наступний
- * - runes.levels: рівні рун та вартість кожного кроку (Lv N -> Lv N+1)
+ * 1. Common -> Great: 1 база + 2 однакові Common копії (всього 3 Common)
+ * 2. Great -> Rare: 1 база + 2 однакові Great копії (всього 3 Great)
+ * 3. Rare -> Epic: 1 база + 2 однакові Rare копії (всього 3 Rare)
+ * 4. Epic -> Epic +1: 1 база + 1 будь-який Epic (корм)
+ * 5. Epic +1 -> Epic +2: 1 база + 2 будь-які Epic (корм)
+ * 6. Epic +2 -> Gold: 1 база + 1 однаковий Epic +2
+ * 7. Gold -> Gold +1: 1 база + 1 будь-який Gold (корм)
+ * 8. Gold +1 -> Gold +2: 1 база + 1 будь-який Gold (корм)
+ * 9. Gold +2 -> Gold +3: 1 база + 2 будь-які Gold (корм)
+ * 10. Gold +3 -> Mythic (Red): 1 база + 1 однаковий Gold +3
  * ============================================================================
  */
 
 export const DEFAULT_GAME_DATA = {
-  version: '1.0.0',
-  description: 'Archero 2 Upgrade Configuration (MOCK DATA)',
+  version: '2.0.0',
+  description: 'Archero 2 Upgrade Configuration (Official Fusion Table for Equipment)',
 
   equipment: {
-    // Порядок рівнів/рідкостей спорядження (від найнижчого до найвищого)
+    // Офіційний порядок рідкостей спорядження Archero 2 з таблиці
     tiers: [
       { id: 'common', label: 'Common', color: '#9e9e9e', bg: 'rgba(158, 158, 158, 0.15)', border: '#9e9e9e' },
       { id: 'great', label: 'Great', color: '#4caf50', bg: 'rgba(76, 175, 80, 0.15)', border: '#4caf50' },
       { id: 'rare', label: 'Rare', color: '#2196f3', bg: 'rgba(33, 150, 243, 0.15)', border: '#2196f3' },
-      { id: 'epic', label: 'Epic', color: '#9c27b0', bg: 'rgba(156, 39, 176, 0.15)', border: '#9c27b0' },
-      { id: 'perfect_epic', label: 'Perfect Epic', color: '#e91e63', bg: 'rgba(233, 30, 99, 0.15)', border: '#e91e63' },
-      { id: 'gold_0', label: 'Gold +0', color: '#ffc107', bg: 'rgba(255, 193, 7, 0.15)', border: '#ffc107' },
-      { id: 'gold_1', label: 'Gold +1', color: '#ffb300', bg: 'rgba(255, 179, 0, 0.18)', border: '#ffb300' },
-      { id: 'gold_2', label: 'Gold +2', color: '#ffa000', bg: 'rgba(255, 160, 0, 0.22)', border: '#ffa000' },
-      { id: 'gold_3', label: 'Gold +3', color: '#ff8f00', bg: 'rgba(255, 143, 0, 0.25)', border: '#ff8f00' },
-      { id: 'gold_4', label: 'Gold +4', color: '#ff6f00', bg: 'rgba(255, 111, 0, 0.28)', border: '#ff6f00' },
-      { id: 'gold_5', label: 'Gold +5', color: '#ff5722', bg: 'rgba(255, 87, 34, 0.28)', border: '#ff5722' },
-      { id: 'legendary_0', label: 'Legendary +0', color: '#ff3d00', bg: 'rgba(255, 61, 0, 0.3)', border: '#ff3d00' },
-      { id: 'legendary_1', label: 'Legendary +1', color: '#d500f9', bg: 'rgba(213, 0, 249, 0.3)', border: '#d500f9' },
-      { id: 'legendary_2', label: 'Legendary +2', color: '#aa00ff', bg: 'rgba(170, 0, 255, 0.35)', border: '#aa00ff' },
-      { id: 'legendary_3', label: 'Legendary +3', color: '#651fff', bg: 'rgba(101, 31, 255, 0.35)', border: '#651fff' },
-      { id: 'mythic', label: 'Mythic', color: '#ff1744', bg: 'rgba(255, 23, 68, 0.4)', border: '#ff1744' },
+      { id: 'epic', label: 'Epic', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)', border: '#a855f7' },
+      { id: 'epic_1', label: 'Epic +1', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.18)', border: '#c084fc', badge: '1' },
+      { id: 'epic_2', label: 'Epic +2', color: '#d8b4fe', bg: 'rgba(216, 180, 254, 0.22)', border: '#d8b4fe', badge: '2' },
+      { id: 'gold', label: 'Gold', color: '#ffb300', bg: 'rgba(255, 179, 0, 0.18)', border: '#ffb300' },
+      { id: 'gold_1', label: 'Gold +1', color: '#ffa000', bg: 'rgba(255, 160, 0, 0.22)', border: '#ffa000', badge: '1' },
+      { id: 'gold_2', label: 'Gold +2', color: '#ff8f00', bg: 'rgba(255, 143, 0, 0.25)', border: '#ff8f00', badge: '2' },
+      { id: 'gold_3', label: 'Gold +3', color: '#ff6f00', bg: 'rgba(255, 111, 0, 0.28)', border: '#ff6f00', badge: '3' },
+      { id: 'mythic', label: 'Mythic (Red)', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.25)', border: '#ef4444', badge: '◆' },
     ],
 
-    // MOCK DATA: Вартість переходу з кожного рівня на наступний
-    // key: id поточного рівня -> value: вимоги для переходу на наступний рівень
+    // Точні вимоги кожного кроку з таблиці користувача
     stepRequirements: {
-      'common': { copies: 2, gold: 5000, scrolls: 5, other: 0 },
-      'great': { copies: 2, gold: 15000, scrolls: 10, other: 0 },
-      'rare': { copies: 2, gold: 35000, scrolls: 20, other: 1 },
-      'epic': { copies: 2, gold: 75000, scrolls: 35, other: 2 },
-      'perfect_epic': { copies: 3, gold: 120000, scrolls: 50, other: 3 },
-      'gold_0': { copies: 2, gold: 150000, scrolls: 60, other: 5 },
-      'gold_1': { copies: 2, gold: 180000, scrolls: 75, other: 6 },
-      'gold_2': { copies: 2, gold: 200000, scrolls: 90, other: 8 },
-      'gold_3': { copies: 2, gold: 230000, scrolls: 110, other: 10 },
-      'gold_4': { copies: 3, gold: 280000, scrolls: 130, other: 12 },
-      'gold_5': { copies: 3, gold: 350000, scrolls: 160, other: 15 },
-      'legendary_0': { copies: 3, gold: 450000, scrolls: 200, other: 20 },
-      'legendary_1': { copies: 3, gold: 550000, scrolls: 240, other: 25 },
-      'legendary_2': { copies: 4, gold: 700000, scrolls: 300, other: 30 },
-      'legendary_3': { copies: 4, gold: 900000, scrolls: 380, other: 40 },
+      // 1. Common -> Great (1 база + 2 такі самі Common)
+      'common': {
+        sameCopies: 2,
+        sameRarity: 'Common',
+        fodderCopies: 0,
+        fodderRarity: '',
+        gold: 5000,
+        scrolls: 10,
+        other: 0,
+        description: '2 такі ж самі Common копії'
+      },
+      // 2. Great -> Rare (1 база + 2 такі самі Great)
+      'great': {
+        sameCopies: 2,
+        sameRarity: 'Great',
+        fodderCopies: 0,
+        fodderRarity: '',
+        gold: 15000,
+        scrolls: 25,
+        other: 0,
+        description: '2 такі ж самі Great копії'
+      },
+      // 3. Rare -> Epic (1 база + 2 такі самі Rare)
+      'rare': {
+        sameCopies: 2,
+        sameRarity: 'Rare',
+        fodderCopies: 0,
+        fodderRarity: '',
+        gold: 40000,
+        scrolls: 50,
+        other: 1,
+        description: '2 такі ж самі Rare копії'
+      },
+      // 4. Epic -> Epic +1 (1 база + 1 будь-який Epic корм)
+      'epic': {
+        sameCopies: 0,
+        sameRarity: '',
+        fodderCopies: 1,
+        fodderRarity: 'Epic',
+        gold: 80000,
+        scrolls: 80,
+        other: 2,
+        description: '1 будь-який Epic (корм)'
+      },
+      // 5. Epic +1 -> Epic +2 (1 база + 2 будь-які Epic корм)
+      'epic_1': {
+        sameCopies: 0,
+        sameRarity: '',
+        fodderCopies: 2,
+        fodderRarity: 'Epic',
+        gold: 120000,
+        scrolls: 120,
+        other: 3,
+        description: '2 будь-які Epic (корм)'
+      },
+      // 6. Epic +2 -> Gold (1 база + 1 однаковий Epic +2)
+      'epic_2': {
+        sameCopies: 1,
+        sameRarity: 'Epic +2',
+        fodderCopies: 0,
+        fodderRarity: '',
+        gold: 180000,
+        scrolls: 160,
+        other: 5,
+        description: '1 такий самий Epic +2'
+      },
+      // 7. Gold -> Gold +1 (1 база + 1 будь-який Gold корм)
+      'gold': {
+        sameCopies: 0,
+        sameRarity: '',
+        fodderCopies: 1,
+        fodderRarity: 'Gold',
+        gold: 240000,
+        scrolls: 200,
+        other: 8,
+        description: '1 будь-який Gold (корм)'
+      },
+      // 8. Gold +1 -> Gold +2 (1 база + 1 будь-який Gold корм)
+      'gold_1': {
+        sameCopies: 0,
+        sameRarity: '',
+        fodderCopies: 1,
+        fodderRarity: 'Gold',
+        gold: 300000,
+        scrolls: 250,
+        other: 10,
+        description: '1 будь-який Gold (корм)'
+      },
+      // 9. Gold +2 -> Gold +3 (1 база + 2 будь-які Gold корм)
+      'gold_2': {
+        sameCopies: 0,
+        sameRarity: '',
+        fodderCopies: 2,
+        fodderRarity: 'Gold',
+        gold: 400000,
+        scrolls: 320,
+        other: 15,
+        description: '2 будь-які Gold (корм)'
+      },
+      // 10. Gold +3 -> Mythic (1 база + 1 однаковий Gold +3)
+      'gold_3': {
+        sameCopies: 1,
+        sameRarity: 'Gold +3',
+        fodderCopies: 0,
+        fodderRarity: '',
+        gold: 600000,
+        scrolls: 450,
+        other: 25,
+        description: '1 такий самий Gold +3'
+      },
     }
   },
 
   runes: {
-    // Максимальний рівень рун у грі
     maxLevel: 20,
-    
-    // MOCK DATA: Вартість переходу з кожного рівня на наступний
-    // key: поточний рівень -> value: вимоги для переходу на (поточний + 1)
     stepRequirements: {
       1: { fragments: 5, gold: 10000, runeDust: 2 },
       2: { fragments: 8, gold: 20000, runeDust: 3 },
@@ -91,7 +179,6 @@ export const DEFAULT_GAME_DATA = {
   }
 };
 
-// Каталог типів спорядження (слоти)
 export const EQUIPMENT_SLOTS = [
   { id: 'Weapon', label: 'Зброя (Weapon)', icon: '⚔️', scrollName: 'Weapon Scrolls' },
   { id: 'Armor', label: 'Броня (Armor)', icon: '🛡️', scrollName: 'Armor Scrolls' },
@@ -101,7 +188,6 @@ export const EQUIPMENT_SLOTS = [
   { id: 'Spellbook', label: 'Книга (Spellbook)', icon: '📖', scrollName: 'Spellbook Scrolls' },
 ];
 
-// Каталог відомих предметів спорядження у грі Archero 2
 export const EQUIPMENT_CATALOG = [
   // Weapon
   { id: 'brightspear', name: 'Brightspear', slot: 'Weapon', icon: '⚡' },
@@ -151,7 +237,6 @@ export const EQUIPMENT_CATALOG = [
   { id: 'ice_realm', name: 'Ice Realm', slot: 'Spellbook', icon: '❄️' },
 ];
 
-// Каталог рун
 export const RUNES_CATALOG = [
   { id: 'courage', name: 'Руна Мужності (Courage Rune)', icon: '🦁', color: '#ff5722' },
   { id: 'power', name: 'Руна Сили (Power Rune)', icon: '⚡', color: '#ff9800' },
