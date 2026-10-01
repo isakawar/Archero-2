@@ -66,20 +66,21 @@ export default function MultiTierInventory({
             <div
               key={t.id}
               style={{
-                background: hasItems ? t.bg : 'var(--bg-input)',
-                border: `1px solid ${hasItems ? t.border : 'var(--border-color)'}`,
-                borderRadius: '8px',
-                padding: '6px 8px',
+                background: hasItems ? t.bg : '#0e1420',
+                border: `2px solid ${hasItems ? t.border : 'rgba(255, 255, 255, 0.08)'}`,
+                borderRadius: '12px',
+                padding: '8px 10px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '4px',
+                gap: '6px',
+                boxShadow: hasItems ? `0 0 12px ${t.color}33` : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
               {/* Tier Name */}
               <div style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
+                fontSize: '0.75rem',
+                fontWeight: 800,
                 color: t.color,
                 display: 'flex',
                 alignItems: 'center',
@@ -90,9 +91,9 @@ export default function MultiTierInventory({
                   <span style={{
                     background: t.color,
                     color: '#000',
-                    fontSize: '0.6rem',
-                    padding: '0 4px',
-                    borderRadius: '3px',
+                    fontSize: '0.65rem',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
                     fontWeight: 900
                   }}>
                     {t.badge}
@@ -101,13 +102,13 @@ export default function MultiTierInventory({
               </div>
 
               {/* Stepper buttons [-] count [+] */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                 <button
                   type="button"
                   onClick={() => handleStep(t.id, -1)}
                   disabled={count <= 0}
                   className="stepper-btn"
-                  style={{ width: '26px', height: '26px', fontSize: '0.9rem' }}
+                  style={{ width: '30px', height: '30px' }}
                 >
                   -
                 </button>
@@ -118,13 +119,15 @@ export default function MultiTierInventory({
                   value={count}
                   onChange={e => handleDirectChange(t.id, e.target.value)}
                   style={{
-                    width: '42px',
+                    width: '46px',
                     textAlign: 'center',
-                    padding: '2px 4px',
-                    fontSize: '0.9rem',
+                    padding: '4px 2px',
+                    fontSize: '1rem',
                     fontWeight: 800,
+                    background: '#090d15',
                     color: hasItems ? t.color : 'inherit',
-                    borderRadius: '6px'
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
                   }}
                 />
 
@@ -132,7 +135,7 @@ export default function MultiTierInventory({
                   type="button"
                   onClick={() => handleStep(t.id, 1)}
                   className="stepper-btn"
-                  style={{ width: '26px', height: '26px', fontSize: '0.9rem' }}
+                  style={{ width: '30px', height: '30px' }}
                 >
                   +
                 </button>

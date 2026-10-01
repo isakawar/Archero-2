@@ -147,11 +147,11 @@ export const EQUIPMENT_SLOTS = [
 ];
 
 export const EQUIPMENT_CATALOG = [
-  { id: 'brightspear', name: 'Brightspear', slot: 'Weapon', icon: '⚡' },
+  { id: 'brightspear', name: 'Brightspear', slot: 'Weapon', icon: '⚡', image: '/images/weapon_spear.jpg' },
+  { id: 'brave_bow', name: 'Brave Bow', slot: 'Weapon', icon: '🏹', image: '/images/weapon_bow.jpg' },
   { id: 'demon_blade', name: 'Demon Blade: Rain', slot: 'Weapon', icon: '🗡️' },
   { id: 'death_scythe', name: 'Death Scythe', slot: 'Weapon', icon: '🪓' },
   { id: 'stalker_staff', name: 'Stalker Staff', slot: 'Weapon', icon: '🪄' },
-  { id: 'brave_bow', name: 'Brave Bow', slot: 'Weapon', icon: '🏹' },
   { id: 'tornado', name: 'Tornado (Boomerang)', slot: 'Weapon', icon: '🌀' },
   { id: 'saw_blade', name: 'Saw Blade', slot: 'Weapon', icon: '🪚' },
   { id: 'mini_atreus', name: 'Mini Atreus', slot: 'Weapon', icon: '🎸' },
@@ -192,6 +192,7 @@ export const RUNES_CATALOG = [
     category: 'Гравійована (Etched)',
     iconKey: 'etched_echo_arrow',
     icon: '🏹',
+    image: '/images/rune_echo_arrow.jpg',
     color: '#ffb300',
     description: 'ТОП руна Archero 2: випускає подвійні стріли-відлуння з величезним уроном'
   },
@@ -201,6 +202,7 @@ export const RUNES_CATALOG = [
     category: 'Гравійована (Etched)',
     iconKey: 'etched_sword',
     icon: '⚔️',
+    image: '/images/rune_sword.jpg',
     color: '#ff8f00',
     description: 'Викликає літаючі мечі, що атакують ворогів навколо'
   },
@@ -210,6 +212,7 @@ export const RUNES_CATALOG = [
     category: 'Гравійована (Etched)',
     iconKey: 'etched_meteor',
     icon: '☄️',
+    image: '/images/rune_meteor.jpg',
     color: '#ff5722',
     description: 'Падіння палаючого метеора при атаках'
   },

@@ -78,30 +78,42 @@ export default function RuneCard({
       {/* Top row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Real Rune Photo / Quality Frame */}
           <div style={{
-            width: '48px',
-            height: '48px',
+            width: '56px',
+            height: '56px',
             borderRadius: '12px',
             background: currentTierObj.bg,
             border: `2px solid ${currentTierObj.border}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: `0 0 12px ${currentTierObj.color}33`,
-            position: 'relative'
+            boxShadow: `0 0 15px ${currentTierObj.color}44`,
+            position: 'relative',
+            overflow: 'hidden',
+            flexShrink: 0
           }}>
-            <RuneIcon id={rune.iconKey || 'etched_echo_arrow'} size={32} rarityColor={currentTierObj.color} />
+            {rune.image || (rune.iconKey === 'etched_echo_arrow' || rune.name.includes('Ехо') ? '/images/rune_echo_arrow.jpg' : rune.iconKey === 'etched_sword' || rune.name.includes('Меч') ? '/images/rune_sword.jpg' : rune.iconKey === 'etched_meteor' || rune.name.includes('Метеор') ? '/images/rune_meteor.jpg' : null) ? (
+              <img
+                src={rune.image || (rune.iconKey === 'etched_sword' ? '/images/rune_sword.jpg' : rune.iconKey === 'etched_meteor' ? '/images/rune_meteor.jpg' : '/images/rune_echo_arrow.jpg')}
+                alt={rune.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <RuneIcon id={rune.iconKey || 'etched_echo_arrow'} size={34} rarityColor={currentTierObj.color} />
+            )}
             {currentTierObj.badge && (
               <span style={{
                 position: 'absolute',
-                bottom: '-3px',
-                right: '-3px',
+                bottom: '2px',
+                right: '2px',
                 background: currentTierObj.color,
                 color: '#000',
-                fontSize: '0.62rem',
+                fontSize: '0.65rem',
                 fontWeight: 900,
                 padding: '0 4px',
-                borderRadius: '3px'
+                borderRadius: '3px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.5)'
               }}>
                 {currentTierObj.badge}
               </span>

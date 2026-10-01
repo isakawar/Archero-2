@@ -88,18 +88,46 @@ export default function EquipmentCard({
       {/* Top row: Item info, slot badge, delete */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Weapon Real Photo / Quality Frame */}
           <div style={{
-            fontSize: '1.6rem',
-            width: '44px',
-            height: '44px',
-            borderRadius: '10px',
+            width: '56px',
+            height: '56px',
+            borderRadius: '12px',
             background: currentTierObj.bg || 'var(--bg-input)',
-            border: `1px solid ${currentTierObj.border || 'var(--border-color)'}`,
+            border: `2px solid ${currentTierObj.border || 'var(--border-color)'}`,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            boxShadow: `0 0 15px ${currentTierObj.color}33`,
+            position: 'relative',
+            overflow: 'hidden',
+            flexShrink: 0
           }}>
-            {item.icon || '⚔️'}
+            {item.image || (item.name === 'Brightspear' ? '/images/weapon_spear.jpg' : item.name === 'Brave Bow' ? '/images/weapon_bow.jpg' : null) ? (
+              <img
+                src={item.image || (item.name === 'Brightspear' ? '/images/weapon_spear.jpg' : '/images/weapon_bow.jpg')}
+                alt={item.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <span style={{ fontSize: '1.8rem' }}>{item.icon || '⚔️'}</span>
+            )}
+            {currentTierObj.badge && (
+              <span style={{
+                position: 'absolute',
+                bottom: '2px',
+                right: '2px',
+                background: currentTierObj.color,
+                color: '#000',
+                fontSize: '0.65rem',
+                fontWeight: 900,
+                padding: '0 4px',
+                borderRadius: '3px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.5)'
+              }}>
+                {currentTierObj.badge}
+              </span>
+            )}
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
