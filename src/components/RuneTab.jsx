@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, CheckCircle } from 'lucide-react';
 import RuneCard from './RuneCard.jsx';
+import RuneIcon from './RuneIcon.jsx';
 import { RUNES_CATALOG } from '../data/defaultGameData.js';
 
 export default function RuneTab({
@@ -19,20 +20,24 @@ export default function RuneTab({
     const existing = runeItems.find(r => r.name.toLowerCase() === catalogRune.name.toLowerCase());
     
     if (existing) {
-      onUpdateRune(existing.id, { ownedFragments: (Number(existing.ownedFragments) || 0) + 10 });
-      setNotice(`Руна "${catalogRune.name}" вже є! Додано +10 фрагментів (всього: ${(Number(existing.ownedFragments) || 0) + 10}).`);
+      const currentInv = existing.inventory || {};
+      const updatedInv = { ...currentInv, great: (Number(currentInv.great) || 0) + 1 };
+      onUpdateRune(existing.id, { inventory: updatedInv });
+      setNotice(`Руна "${catalogRune.name}" вже є! Додано +1 зелену (Great) руну в інвентар.`);
     } else {
       const newRune = {
         id: 'rune_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         name: catalogRune.name,
+        category: catalogRune.category,
+        iconKey: catalogRune.iconKey,
         icon: catalogRune.icon,
         color: catalogRune.color,
-        currentLevel: 4,
-        targetLevel: 8,
-        ownedFragments: 20
+        currentTier: 'gold_1',
+        targetTier: 'gold_2',
+        inventory: { great: 2, rare: 1 }
       };
       onAddOrUpdateRune(newRune);
-      setNotice(`Додано ціль для: "${catalogRune.name}"`);
+      setNotice(`Додано ціль для: "${catalogRune.name}" (Gold 1 ➔ Gold 2)`);
     }
 
     setTimeout(() => setNotice(''), 3500);
@@ -118,13 +123,14 @@ export default function RuneTab({
                     borderLeft: `3px solid ${catRune.color}`
                   }}
                 >
-                  <span style={{ fontSize: '1.4rem' }}>{catRune.icon}</span>
+                  <RuneIcon id={catRune.iconKey} size={30} rarityColor={catRune.color} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.88rem', fontWeight: 700 }}>{catRune.name}</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{catRune.description}</div>
                   </div>
                   {alreadyHas && (
                     <span style={{ fontSize: '0.7rem', color: 'var(--accent-gold)', fontWeight: 700 }}>
-                      +10 фр.
+                      +1 копія
                     </span>
                   )}
                 </button>

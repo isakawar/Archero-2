@@ -13,16 +13,19 @@ import {
   formatNumber 
 } from './engine/calculator.js';
 
-// Початкові демонстраційні предмети (відповідають прикладу в ТЗ)
+// Початкові предмети (відповідають прикладу користувача: Gold 1 ➔ Gold 2)
 const INITIAL_EQUIPMENT = [
   {
     id: 'eq_brightspear',
     name: 'Brightspear',
     slot: 'Weapon',
     icon: '⚡',
-    currentTier: 'gold_2',
-    targetTier: 'gold_3',
-    ownedCopies: 3
+    currentTier: 'gold_1',
+    targetTier: 'gold_2',
+    inventory: {
+      great: 2,
+      rare: 1
+    }
   },
   {
     id: 'eq_armor',
@@ -31,19 +34,26 @@ const INITIAL_EQUIPMENT = [
     icon: '🛡️',
     currentTier: 'gold_1',
     targetTier: 'gold_3',
-    ownedCopies: 1
+    inventory: {
+      great: 3
+    }
   }
 ];
 
 const INITIAL_RUNES = [
   {
-    id: 'rune_courage',
-    name: 'Руна Мужності (Courage Rune)',
-    icon: '🦁',
-    color: '#ff5722',
-    currentLevel: 4,
-    targetLevel: 8,
-    ownedFragments: 15
+    id: 'rune_echo_arrow',
+    name: 'Гравійована: Стріла Ехо (Arrow of Echoes)',
+    category: 'Гравійована (Etched)',
+    iconKey: 'etched_echo_arrow',
+    icon: '🏹',
+    color: '#ffb300',
+    currentTier: 'gold_1',
+    targetTier: 'gold_2',
+    inventory: {
+      great: 2,
+      rare: 1
+    }
   }
 ];
 

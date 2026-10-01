@@ -4,8 +4,10 @@ import {
   calculateUpgradeCost, 
   calculateMissingResources, 
   calculateProgress,
+  calculateMultiTierInventory,
   formatNumber 
 } from '../engine/calculator.js';
+import MultiTierInventory from './MultiTierInventory.jsx';
 
 export default function EquipmentCard({
   item,
@@ -44,8 +46,15 @@ export default function EquipmentCard({
     ? calculateMissingResources(activeRequired, userOwned)
     : null;
 
-  const progress = fullCost.isValid 
-    ? calculateProgress(activeRequired, userOwned)
+  const inventory = item.inventory || { great: 2, rare: 1 };
+  const multiTierCalc = calculateMultiTierInventory(item.currentTier, item.targetTier, inventory);
+
+  const handleInventoryChange = (newInv) => {
+    onUpdateItem(item.id, { inventory: newInv });
+  };
+
+  const progress = multiTierCalc.isValid 
+    ? multiTierCalc.progressPercent 
     : (fullCost.isAlreadyAtTarget ? 100 : 0);
 
   // Зміна копій через stepper
@@ -481,20 +490,30 @@ export default function EquipmentCard({
           {/* Progress Bar */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Прогрес підготовки:</span>
-              <strong style={{ color: progress === 100 ? '#22c55e' : 'var(--accent-gold)' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>Прогрес підготовки з урахуванням інвентаря:</span>
+              <strong style={{ color: progress >= 100 ? '#22c55e' : 'var(--accent-gold)' }}>
                 {progress}%
               </strong>
             </div>
             <div className="progress-bar-container">
               <div
-                className={`progress-bar-fill ${progress === 100 ? 'complete' : ''}`}
-                style={{ width: `${progress}%` }}
+                className={`progress-bar-fill ${progress >= 100 ? 'complete' : ''}`}
+                style={{ width: `${Math.min(100, progress)}%` }}
               />
             </div>
           </div>
         </div>
       )}
+
+      {/* Multi-Tier Steppers Inventory (Плюсики та мінусики для спорядження) */}
+      <MultiTierInventory
+        inventory={inventory}
+        onChangeInventory={handleInventoryChange}
+        multiTierCalc={multiTierCalc}
+        currentTier={item.currentTier}
+        targetTier={item.targetTier}
+        itemLabel={item.name}
+      />
     </div>
   );
 }
