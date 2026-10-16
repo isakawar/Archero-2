@@ -2,1103 +2,724 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Калькулятор мерджу Archero 2</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏹</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Калькулятор злиття Archero 2</title>
+  <link rel="icon" type="image/png" href="icons/gear/L.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg-main: #0c1222;
-      --bg-card: #151d33;
-      --bg-card-sub: #1c2642;
-      --bg-input: #0a0f1d;
-      --border-main: #2b3859;
-      --border-accent: #f59e0b;
-      
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      
-      /* Archero Rarity Colors */
-      --c-common: #94a3b8;
-      --c-great: #22c55e;
-      --c-rare: #3b82f6;
-      --c-epic: #a855f7;
-      --c-legendary: #f59e0b;
-      --c-mythic: #ef4444;
-      --c-chaos: #ec4899;
-      
-      --shadow-card: 0 6px 0 #070a14;
-      --shadow-btn: 0 4px 0 #070a14;
-      --shadow-btn-gold: 0 4px 0 #b45309;
+      --bg: #1c2747;
+      --ink: #2a2238;
+      --ink-dark: #1a1030;
+      --shadow: #0b1122;
+      --cream: #fdf6e9;
+      --muted: #6b5a3e;
+      --soft: #c9d2ea;
+      --soft-2: #aab5d3;
+      --gold-a: #ffc23d;
+      --gold-b: #f0a21a;
+      --gold-text: #ffd56a;
+      --lf: 'Lilita One', 'Arial Black', sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; background: var(--bg); }
+    a { color: var(--gold-text); } a:hover { color: #fff; }
+    button { font-family: inherit; cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px; }
 
-    body {
-      background: radial-gradient(circle at 50% 0%, #172344 0%, var(--bg-main) 75%);
-      color: var(--text-main);
-      font-family: 'Plus Jakarta Sans', sans-serif;
+    .page {
       min-height: 100vh;
-      padding: 16px 12px 60px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      padding: 28px 20px 0;
+      font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+      color: var(--ink);
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(45deg, rgba(255,255,255,.04) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.04) 75%),
+        linear-gradient(45deg, rgba(255,255,255,.04) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.04) 75%);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
     }
+    .wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; padding-bottom: 40px; }
 
-    .app-container {
-      width: 100%;
-      max-width: 860px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    .stroke { color: #fff; -webkit-text-stroke: 6px var(--ink-dark); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink-dark); }
+    .lf { font-family: var(--lf); font-weight: 400; }
+
+    /* Buttons */
+    .btn { transition: transform .06s ease, box-shadow .06s ease; }
+    .btn:active { transform: translateY(3px); box-shadow: inset 0 3px 0 rgba(255,255,255,.4), 0 0 0 transparent !important; }
 
     /* Header */
-    header {
-      text-align: center;
-      padding: 8px 0 4px;
+    header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      width: 56px; height: 56px; flex: 0 0 auto; border-radius: 16px; border: 3px solid var(--ink-dark);
+      background: linear-gradient(#ffc23d, #e08a00);
+      box-shadow: inset 0 4px 0 rgba(255,255,255,.5), 0 5px 0 var(--ink-dark);
+      display: flex; align-items: center; justify-content: center;
+    }
+    h1 { margin: 0; font-size: 36px; letter-spacing: .5px; }
+    .subtitle { margin: 4px 0 0; font-size: 15px; font-weight: 800; color: var(--soft); }
+
+    .tabs { display: flex; gap: 6px; background: #0f1628; border: 3px solid var(--shadow); padding: 6px; border-radius: 18px; }
+    .tab {
+      border: 2px solid transparent; border-radius: 12px; padding: 10px 18px; min-height: 44px;
+      font-size: 16px; font-weight: 900; background: transparent; color: var(--soft);
+    }
+    .tab[aria-selected="true"] {
+      border-color: var(--ink-dark); color: #3a2200;
+      background: linear-gradient(var(--gold-a), var(--gold-b));
+      box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 4px 0 var(--ink-dark);
     }
 
-    h1 {
-      font-family: 'Lilita One', cursive;
-      font-size: 32px;
-      letter-spacing: 1px;
-      color: #ffd166;
-      text-shadow: 0 3px 0 #b45309, 0 0 20px rgba(255, 209, 102, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+    /* Cards */
+    .card {
+      background: var(--cream); border: 3px solid var(--ink); border-radius: 22px;
+      box-shadow: inset 0 4px 0 #fff, 0 7px 0 var(--shadow);
+      padding: 22px; display: flex; flex-direction: column; gap: 16px;
+    }
+    .card h2 { margin: 0; font-size: 24px; color: var(--ink); }
+    .card-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .picked { font-size: 15px; font-weight: 800; color: var(--muted); }
+    .hint { margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); }
+    .caps { font-size: 13px; font-weight: 900; letter-spacing: .6px; text-transform: uppercase; }
+
+    /* Targets */
+    .targets { display: flex; flex-wrap: wrap; gap: 10px; }
+    .target {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 12px 6px 8px; min-width: 92px; border-radius: 16px;
+      border: 3px solid transparent; background: transparent;
+    }
+    .target:hover { background: rgba(255, 227, 154, .35); }
+    .target[aria-pressed="true"] {
+      border-color: var(--ink-dark); background: linear-gradient(#fff6dc, #ffe39a);
+      box-shadow: inset 0 3px 0 #fff, 0 4px 0 var(--ink-dark);
+    }
+    .target-name { font-size: 13px; font-weight: 800; color: #4a3d2a; line-height: 1.15; text-align: center; max-width: 84px; }
+
+    /* Tiles */
+    .tile { position: relative; display: inline-flex; flex: 0 0 auto; width: var(--s); height: var(--s); }
+    .tile img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 0 rgba(0,0,0,.35)); }
+    .tile .s-mark {
+      position: absolute; left: -6px; top: -8px; font-family: var(--lf); line-height: 1;
+      font-size: max(14px, calc(var(--s) * .34));
+      color: #ffd23d; -webkit-text-stroke: max(3px, calc(var(--s) * .095)) #3a1d00; paint-order: stroke fill;
+    }
+    /* Gear tiles: in-game art cropped to the inner square, frame drawn in CSS */
+    .tile.framed .face {
+      position: absolute; inset: 0; overflow: hidden;
+      border-radius: calc(var(--s) * .24);
+      border: max(2px, calc(var(--s) * .05)) solid var(--rd);
+      background: var(--rb);
+      box-shadow: var(--ring, 0 0 0 transparent), 0 max(2px, calc(var(--s) * .06)) 0 rgba(11, 17, 34, .35);
+    }
+    .tile.framed .face img { width: 100%; height: 100%; object-fit: cover; filter: none; }
+    .tile.framed .face::after {
+      content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      box-shadow: inset 0 0 0 max(1px, calc(var(--s) * .035)) var(--ra);
+      background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0) 40%, rgba(0,0,0,0) 68%, rgba(0,0,0,.2));
+    }
+    .tile.framed.r-L { --ring: 0 0 0 max(1.5px, calc(var(--s) * .04)) #ffdb6e; }
+    .tile.framed.r-M { --ring: 0 0 0 max(1.5px, calc(var(--s) * .04)) #ffcf5a, 0 0 calc(var(--s) * .22) rgba(255, 92, 70, .55); }
+    .tile .lvl {
+      position: absolute; left: 50%; bottom: calc(var(--s) * -.13); transform: translateX(-50%);
+      min-width: max(16px, calc(var(--s) * .36)); height: max(15px, calc(var(--s) * .3));
+      padding: 0 max(3px, calc(var(--s) * .06)); box-sizing: border-box;
+      border-radius: 99px; background: linear-gradient(var(--ra), var(--rb));
+      border: max(1.5px, calc(var(--s) * .035)) solid #fff;
+      box-shadow: 0 0 0 max(1.5px, calc(var(--s) * .03)) var(--rd), 0 2px 0 rgba(0, 0, 0, .25);
+      color: #fff; font-family: var(--lf); font-size: max(10px, calc(var(--s) * .21));
+      -webkit-text-stroke: max(2px, calc(var(--s) * .05)) var(--rd); paint-order: stroke fill;
+      display: flex; align-items: center; justify-content: center; line-height: 1;
     }
 
-    p.subtitle {
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 600;
-      margin-top: 4px;
+    /* Layout columns */
+    .cols { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+    .inv { flex: 1 1 380px; min-width: 0; gap: 14px; }
+    .reset { border: 0; background: transparent; font-size: 15px; font-weight: 800; color: #8a4b0a; text-decoration: underline; padding: 10px 4px; min-height: 44px; }
+    .rows { display: flex; flex-direction: column; gap: 8px; }
+    .rows[hidden] { display: none; }
+    .fodder-block { border-top: 2px dashed #e2d2b0; padding-top: 14px; }
+    .fodder-block .caps { color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 12px; background: #fff; border: 2px solid #e4d5b5; border-radius: 16px; padding: 8px 10px; }
+    .row-name { flex: 1 1 auto; min-width: 0; font-weight: 800; font-size: 15px; }
+    .down { display: inline-block; margin-left: 8px; font-size: 12px; font-weight: 800; color: #1f5a2e; background: #dff3e3; border-radius: 6px; padding: 2px 7px; }
+    .step {
+      width: 44px; height: 44px; flex: 0 0 auto; border-radius: 12px; font-size: 22px; font-weight: 900; line-height: 1;
     }
+    .step.minus { border: 2px solid #8a7550; background: #eadcbf; box-shadow: inset 0 3px 0 rgba(255,255,255,.6), 0 3px 0 #8a7550; color: #4a3d2a; }
+    .step.plus { border: 2px solid #7a4800; background: linear-gradient(var(--gold-a), var(--gold-b)); box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 3px 0 #7a4800; color: #3a2200; }
+    .count {
+      width: 52px; flex: 0 0 auto; text-align: center; font-family: var(--lf); font-size: 24px; color: var(--ink);
+      border: 0; background: transparent; padding: 0; border-radius: 8px; -moz-appearance: textfield; appearance: textfield;
+    }
+    .count::-webkit-outer-spin-button, .count::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .count:focus { background: #fff3d1; }
 
-    /* Mode Navigation Tabs */
-    .tabs-wrapper {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      background: rgba(10, 15, 29, 0.7);
-      padding: 6px;
-      border-radius: 16px;
-      border: 1px solid var(--border-main);
+    /* Result panel */
+    .result {
+      position: relative; flex: 1 1 480px; min-width: 0;
+      background: linear-gradient(180deg, #2c3760, #222b4c);
+      border: 3px solid var(--rb); border-radius: 22px;
+      box-shadow: inset 0 3px 0 rgba(255,255,255,.12), 0 7px 0 var(--shadow), 0 0 48px var(--rglow);
+      padding: 22px; display: flex; flex-direction: column; gap: 18px; color: #fff;
     }
+    .result-head { display: flex; align-items: center; gap: 16px; }
+    .result-head .caps { display: block; color: var(--soft); }
+    .result-head h2 { margin: 2px 0 0; font-size: 30px; }
 
-    .mode-tab {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 14px 16px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Lilita One', cursive;
-      font-size: 18px;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      background: transparent;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .mode-tab.active {
-      color: #0c1222;
-      background: linear-gradient(180deg, #ffd166 0%, #f59e0b 100%);
-      box-shadow: 0 4px 0 #b45309, 0 0 15px rgba(245, 158, 11, 0.4);
-      transform: translateY(-2px);
-    }
-
-    /* Section Card */
-    .section-card {
-      background: var(--bg-card);
-      border: 2px solid var(--border-main);
-      border-radius: 18px;
-      padding: 20px 18px;
-      box-shadow: var(--shadow-card);
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      gap: 12px;
-    }
-
-    .section-title {
-      font-family: 'Lilita One', cursive;
-      font-size: 20px;
-      letter-spacing: 0.5px;
-      color: #ffd166;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .section-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .reset-btn {
-      background: #202b45;
-      border: 1px solid var(--border-main);
-      color: #cbd5e1;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 2px 0 #0f1626;
-      transition: 0.15s;
-    }
-    .reset-btn:hover {
-      background: #2d3b5d;
-      color: #fff;
-    }
-    .reset-btn:active {
-      transform: translateY(2px);
-      box-shadow: none;
-    }
-
-    /* 1. Target Selector Grid */
-    .tiers-scroll {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-      gap: 8px;
-    }
-
-    .tier-chip {
-      background: var(--bg-card-sub);
-      border: 2px solid var(--border-main);
-      border-radius: 14px;
-      padding: 10px 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 3px 0 #0f1626;
-      user-select: none;
-    }
-
-    .tier-chip:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 0 #0f1626;
-    }
-
-    .tier-chip.active {
-      border-color: #ffd166;
-      background: linear-gradient(180deg, #2b395d, #1b253f);
-      box-shadow: 0 0 16px rgba(255, 209, 102, 0.4), 0 3px 0 #0f1626;
-      transform: translateY(-2px);
-    }
-
-    .tier-icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Lilita One', cursive;
-      font-size: 19px;
-      position: relative;
-      box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 3px 6px rgba(0,0,0,0.4);
-      border: 2px solid rgba(255,255,255,0.25);
-    }
-
-    /* Hexagon shape for Runes */
-    .tier-icon-box.hexagon {
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      border-radius: 0;
-      border: none;
-    }
-
-    .tier-chip-name {
-      font-family: 'Lilita One', cursive;
-      font-size: 13px;
-      letter-spacing: 0.3px;
-      text-align: center;
-      line-height: 1.1;
-    }
-
-    .tier-chip-sub {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-
-    /* 2. Inventory (What You Already Have) */
-    .inventory-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .inv-row {
-      background: var(--bg-card-sub);
-      border: 1px solid var(--border-main);
-      border-radius: 14px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      box-shadow: 0 3px 0 #0f1626;
-      flex-wrap: wrap;
-    }
-
-    .inv-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 190px;
-    }
-
-    .inv-badge {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Lilita One', cursive;
-      font-size: 16px;
-      font-weight: 800;
-      box-shadow: inset 0 2px 3px rgba(255,255,255,0.25), 0 2px 5px rgba(0,0,0,0.3);
-      flex-shrink: 0;
-    }
-
-    .inv-badge.hexagon {
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      border-radius: 0;
-    }
-
-    .inv-name-box {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .inv-name {
-      font-family: 'Lilita One', cursive;
-      font-size: 15px;
-      letter-spacing: 0.3px;
-    }
-
-    .inv-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .downgrade-tag {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: #ffd166;
-      font-size: 9px;
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-weight: 800;
-    }
-
-    .stepper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .step-btn {
-      width: 36px;
-      height: 36px;
-      background: #253352;
-      border: 1px solid var(--border-main);
-      border-radius: 10px;
-      color: #fff;
-      font-family: 'Lilita One', cursive;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 3px 0 #0d1424;
-      transition: 0.1s;
-      user-select: none;
-    }
-
-    .step-btn:hover {
-      background: #32446e;
-    }
-
-    .step-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 1px 0 #0d1424;
-    }
-
-    .step-input {
-      width: 58px;
-      height: 36px;
-      background: var(--bg-input);
-      border: 1.5px solid var(--border-main);
-      border-radius: 10px;
-      color: #ffd166;
-      font-family: 'Lilita One', cursive;
-      font-size: 18px;
-      text-align: center;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .step-input:focus {
-      border-color: #ffd166;
-      box-shadow: 0 0 8px rgba(255, 209, 102, 0.3);
-    }
-
-    /* 3. Summary & Remaining Section */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .summary-card {
-      background: var(--bg-card-sub);
-      border: 2px solid var(--border-main);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      position: relative;
-      box-shadow: var(--shadow-btn);
-    }
-
-    .summary-label {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .summary-value {
-      font-family: 'Lilita One', cursive;
-      font-size: 30px;
-      color: #ffd166;
-      line-height: 1.1;
-      text-shadow: 0 2px 0 rgba(0,0,0,0.5);
-    }
-
-    .summary-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    /* Progress bar */
-    .progress-box {
-      background: var(--bg-card-sub);
-      border: 1px solid var(--border-main);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-
-    .progress-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .progress-title {
-      font-family: 'Lilita One', cursive;
-      font-size: 15px;
-      color: #e2e8f0;
-      letter-spacing: 0.5px;
-    }
-
-    .progress-pct {
-      font-family: 'Lilita One', cursive;
-      font-size: 18px;
-      color: #22c55e;
-      text-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
-    }
-
-    .bar-track {
-      width: 100%;
-      height: 16px;
-      background: #090e1a;
-      border: 1px solid var(--border-main);
-      border-radius: 999px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
-    }
-
+    .bar { position: relative; height: 30px; background: #0f1628; border: 3px solid var(--shadow); border-radius: 99px; overflow: hidden; }
     .bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #f59e0b 0%, #ffd166 100%);
-      border-radius: 999px;
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+      height: 100%; border-radius: 99px; background-color: var(--gold-b);
+      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.28) 0 7px, transparent 7px 14px);
+      background-size: 28px 28px; box-shadow: inset 0 4px 0 rgba(255,255,255,.35);
+      animation: stripes 1s linear infinite; transition: width .35s ease;
+    }
+    .bar-fill.full { animation: stripes 1s linear infinite, glow 1.4s ease-in-out infinite; }
+    .bar-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 17px; -webkit-text-stroke: 4px var(--ink-dark); }
+    .ready { margin: 0; text-align: center; font-size: 28px; color: var(--gold-text); }
+
+    .needs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .need {
+      background: var(--cream); border: 3px solid var(--ink-dark); color: var(--ink); border-radius: 16px;
+      padding: 12px 14px; box-shadow: inset 0 3px 0 #fff, 0 4px 0 var(--shadow);
+      display: flex; flex-direction: column; gap: 6px; min-width: 0;
+    }
+    .need .caps { letter-spacing: .4px; color: var(--muted); }
+    .need-val { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .need-num { font-family: var(--lf); font-size: 42px; line-height: 1; color: #fff; -webkit-text-stroke: 7px var(--nc); paint-order: stroke fill; }
+    .need-sub { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .need.wide { grid-column: 1 / -1; }
+    .need-alts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+    .need-unit { margin-left: 2px; font-size: 14px; font-weight: 800; color: var(--muted); }
+    .need-alts .need-num { margin-right: 4px; }
+    .need-or { font-size: 13px; font-weight: 900; text-transform: uppercase; color: #a8916a; }
+
+    .path { display: flex; flex-direction: column; gap: 8px; }
+    .path > .caps { color: var(--soft); }
+    .path ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .path li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: #16203b; border: 2px solid var(--shadow); border-radius: 14px; padding: 8px 12px; }
+    .times { font-family: var(--lf); font-size: 22px; min-width: 44px; color: var(--gold-text); -webkit-text-stroke: 5px var(--ink-dark); paint-order: stroke fill; }
+    .op { font-family: var(--lf); font-size: 22px; color: #fff; }
+    .step-label { flex: 1 1 140px; font-size: 13px; font-weight: 700; color: var(--soft-2); text-align: right; }
+    .footnote { margin: 0; font-size: 13px; font-weight: 700; color: var(--soft-2); }
+
+    footer { text-align: center; font-size: 13px; font-weight: 700; color: var(--soft-2); }
+
+    /* Animations */
+    .bump { display: inline-block; animation: bump .35s ease; }
+    @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.22); } 100% { transform: scale(1); } }
+    @keyframes stripes { to { background-position: 28px 0; } }
+    @keyframes glow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.25); } }
+    @keyframes spark {
+      0% { opacity: 0; transform: translateY(8px) scale(.4) rotate(0); }
+      40% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-26px) scale(1.1) rotate(90deg); }
+    }
+    .spark {
+      position: absolute; width: 14px; height: 14px; background: var(--gold-text);
+      clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+      animation: spark 1.6s ease-in-out infinite; pointer-events: none;
     }
 
-    /* Synthesis Path Steps */
-    .path-steps {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    /* Mobile sticky bar */
+    .mbar {
+      display: none; position: sticky; bottom: 0; margin: 0 -20px;
+      padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+      background: #0f1628; border-top: 3px solid var(--shadow); align-items: center; gap: 12px;
     }
+    .mbar-text { flex: 1 1 auto; min-width: 0; font-size: 18px; color: #fff; }
+    .mbar-pct { font-size: 20px; color: var(--gold-text); }
 
-    .path-card {
-      background: #0d1527;
-      border: 1px solid var(--border-main);
-      border-radius: 12px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
+    @media (max-width: 760px) {
+      .mbar { display: flex; }
+      .page { padding: 20px 16px 0; }
+      .mbar { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+      h1 { font-size: 28px; }
+      .card, .result { padding: 18px 14px; }
+      .targets { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
+      .target { min-width: 0; }
+      header, .tabs { width: 100%; }
+      .tab { flex: 1 1 0; padding: 8px 6px; font-size: 14px; }
+      .row { gap: 6px; padding: 8px; }
+      .row-name { font-size: 14px; overflow-wrap: anywhere; }
+      .count { width: 40px; }
     }
-
-    .path-target {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'Lilita One', cursive;
-      font-size: 15px;
-      min-width: 170px;
-    }
-
-    .path-arrow {
-      color: #ffd166;
-      font-family: 'Lilita One', cursive;
-      font-size: 18px;
-    }
-
-    .path-reqs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #17223c;
-      border: 1px solid var(--border-main);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .pill b {
-      font-family: 'Lilita One', cursive;
-      font-size: 14px;
-    }
-
-    /* Rarity badge backgrounds */
-    .bg-common { background: #64748b; color: #fff; }
-    .bg-great { background: #16a34a; color: #fff; }
-    .bg-rare { background: #2563eb; color: #fff; }
-    .bg-epic { background: #9333ea; color: #fff; }
-    .bg-legendary { background: #d97706; color: #fff; }
-    .bg-mythic { background: #dc2626; color: #fff; }
-
-    .color-common { color: var(--c-common); }
-    .color-great { color: var(--c-great); }
-    .color-rare { color: var(--c-rare); }
-    .color-epic { color: var(--c-epic); }
-    .color-legendary { color: var(--c-legendary); }
-    .color-mythic { color: var(--c-mythic); }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 10px;
-    }
-
-    footer a {
-      color: #ffd166;
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    @media (max-width: 600px) {
-      h1 { font-size: 26px; }
-      .section-card { padding: 16px 12px; }
-      .tiers-scroll { grid-template-columns: repeat(4, 1fr); }
-      .summary-value { font-size: 26px; }
+    @media (prefers-reduced-motion: reduce) {
+      .bump, .spark, .bar-fill, .bar-fill.full { animation: none; }
     }
   </style>
 </head>
 <body>
+  <div class="page">
+    <div class="wrap">
+      <header>
+        <div class="brand">
+          <div class="logo">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3a2200" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v6a4 4 0 0 0 8 0V3"></path><path d="M12 13v8"></path><path d="M8 21h8"></path></svg>
+          </div>
+          <div>
+            <h1 class="lf stroke">Калькулятор злиття</h1>
+            <p class="subtitle">Archero 2 · спорядження S-рівня та руни</p>
+          </div>
+        </div>
+        <div class="tabs" role="tablist">
+          <button class="tab btn" role="tab" data-mode="gear">Спорядження S</button>
+          <button class="tab btn" role="tab" data-mode="rune">Руни</button>
+        </div>
+      </header>
 
-  <div class="app-container">
-    <!-- Header -->
-    <header>
-      <h1>🏹 Archero 2 Calculator</h1>
-      <p class="subtitle">Калькулятор мерджу спорядження S та рун</p>
-    </header>
+      <section class="card">
+        <div class="card-head">
+          <h2 class="lf">1. Яку ціль хочеш?</h2>
+          <span class="picked" id="picked"></span>
+        </div>
+        <div class="targets" id="targets"></div>
+      </section>
 
-    <!-- Mode Tabs: Gear S / Runes -->
-    <div class="tabs-wrapper">
-      <button class="mode-tab active" id="tabGear" onclick="setMode('gear')">
-        <span>⚔️</span> Спорядження S
-      </button>
-      <button class="mode-tab" id="tabRunes" onclick="setMode('runes')">
-        <span>🔮</span> Руни
-      </button>
+      <div class="cols">
+        <section class="card inv">
+          <div class="card-head" style="align-items:center">
+            <h2 class="lf">2. Що вже маєш</h2>
+            <button class="reset" data-action="reset">Скинути</button>
+          </div>
+          <p class="hint">Вкажи готові предмети — вони підуть у злиття замість збирання з нуля.</p>
+          <div class="rows" id="invRows"></div>
+          <div class="rows fodder-block" id="fodderBlock"></div>
+        </section>
+
+        <section class="result" id="result"></section>
+      </div>
+
+      <footer>
+        Archero 2 Clan Companion · <a href="https://github.com/isakawar/Archero-2" target="_blank" rel="noopener">GitHub</a>
+      </footer>
     </div>
 
-    <!-- 1. Target Rarity Section -->
-    <section class="section-card">
-      <div class="section-header">
-        <div class="section-title">
-          <span>1. Ціль</span>
-        </div>
-        <div class="section-actions">
-          <span id="targetBadgeDisplay" style="font-family:'Lilita One',cursive; font-size:16px; color:#ffd166;"></span>
-        </div>
-      </div>
-      <div class="tiers-scroll" id="targetGrid"></div>
-    </section>
-
-    <!-- 2. Inventory (What You Already Have) -->
-    <section class="section-card">
-      <div class="section-header">
-        <div class="section-title">
-          <span>2. Що вже маєш</span>
-        </div>
-        <div class="section-actions">
-          <button class="reset-btn" onclick="resetInventory()">Скинути все</button>
-        </div>
-      </div>
-      <div class="inventory-list" id="inventoryList"></div>
-    </section>
-
-    <!-- 3. What You Still Need & Progress -->
-    <section class="section-card">
-      <div class="section-header">
-        <div class="section-title">
-          <span>3. Ще потрібно</span>
-        </div>
-      </div>
-
-      <!-- Summary Cards Grid -->
-      <div class="summary-grid" id="summaryGrid"></div>
-
-      <!-- Progress Bar -->
-      <div class="progress-box">
-        <div class="progress-header">
-          <span class="progress-title">Прогрес до цілі</span>
-          <span class="progress-pct" id="progressPct">0%</span>
-        </div>
-        <div class="bar-track">
-          <div class="bar-fill" id="progressBar" style="width: 0%;"></div>
-        </div>
-      </div>
-
-      <!-- Step by Step Path -->
-      <div class="section-title" style="font-size: 16px; margin-bottom: 12px;">
-        <span>Покроковий шлях злиття:</span>
-      </div>
-      <div class="path-steps" id="pathSteps"></div>
-    </section>
-
-    <footer>
-      Archero 2 Clan Companion • <a href="https://github.com/isakawar/Archero-2" target="_blank">GitHub</a>
-    </footer>
+    <div class="mbar" id="mbar"></div>
   </div>
 
   <script>
-    // --- GEAR S DEFINITIONS & RULES ---
-    // According to the official Archero 2 chart:
-    // Epic (E): 1 S copy
-    // Epic +1 (E1): E + 1 Epic Fodder (1 S, 1 Epic Fodder)
-    // Epic +2 (E2): E1 + 2 Epic Fodder (1 S, 3 Epic Fodder)
-    // Legendary (L): 2x E2 (2 S, 6 Epic Fodder)
-    // Legendary +1 (L1): L + 1 Leg Fodder
-    // Legendary +2 (L2): L1 + 1 Leg Fodder
-    // Legendary +3 (L3): L2 + 2 Leg Fodder (2 S, 6 Epic Fodder, 4 Leg Fodder) [equivalent to 38 base Epic Fodder]
-    // Mythic (M): 2x L3 (4 S, 12 Epic Fodder, 8 Leg Fodder) [76 Epic Fodder total]
-    // Mythic +1 (M1): M + 1x L3 (6 S, 18 Epic Fodder, 12 Leg Fodder) [114 Epic Fodder total]
-    // Mythic +2 (M2): M1 + 1x L3 (8 S, 24 Epic Fodder, 16 Leg Fodder) [152 Epic Fodder total]
-    // Mythic +3 (M3): M2 + 1x L3 (10 S, 30 Epic Fodder, 20 Leg Fodder) [190 Epic Fodder total]
-    // Mythic +4 (M4): M3 + 1x L3 (12 S, 36 Epic Fodder, 24 Leg Fodder) [228 Epic Fodder total]
-
-    const GEAR_TIERS = [
-      { id: 'epic', name: 'Епічний', sub: 'Epic', copies: 1, epicFodder: 0, legFodder: 0, colorClass: 'color-epic', bgClass: 'bg-epic', icon: 'E' },
-      { id: 'epic_1', name: 'Епічний +1', sub: 'Epic +1', copies: 1, epicFodder: 1, legFodder: 0, colorClass: 'color-epic', bgClass: 'bg-epic', icon: 'E+1', canDowngrade: true },
-      { id: 'epic_2', name: 'Епічний +2', sub: 'Epic +2', copies: 1, epicFodder: 3, legFodder: 0, colorClass: 'color-epic', bgClass: 'bg-epic', icon: 'E+2', canDowngrade: true },
-      { id: 'legendary', name: 'Легендарний', sub: 'Legendary', copies: 2, epicFodder: 6, legFodder: 0, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: 'L' },
-      { id: 'legendary_1', name: 'Легенд. +1', sub: 'Legendary +1', copies: 2, epicFodder: 6, legFodder: 1, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: 'L+1' },
-      { id: 'legendary_2', name: 'Легенд. +2', sub: 'Legendary +2', copies: 2, epicFodder: 6, legFodder: 2, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: 'L+2' },
-      { id: 'legendary_3', name: 'Легенд. +3', sub: 'Legendary +3', copies: 2, epicFodder: 6, legFodder: 4, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: 'L+3' },
-      { id: 'mythic', name: 'Міфічний', sub: 'Mythic', copies: 4, epicFodder: 12, legFodder: 8, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M' },
-      { id: 'mythic_1', name: 'Міфічний +1', sub: 'Mythic +1', copies: 6, epicFodder: 18, legFodder: 12, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M+1' },
-      { id: 'mythic_2', name: 'Міфічний +2', sub: 'Mythic +2', copies: 8, epicFodder: 24, legFodder: 16, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M+2' },
-      { id: 'mythic_3', name: 'Міфічний +3', sub: 'Mythic +3', copies: 10, epicFodder: 30, legFodder: 20, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M+3' },
-      { id: 'mythic_4', name: 'Міфічний +4', sub: 'Mythic +4', copies: 12, epicFodder: 36, legFodder: 24, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M+4' }
-    ];
-
-    // --- RUNES DEFINITIONS & RULES ---
-    // Common -> Great (3x) -> Rare (3x) -> Epic (3x = 27)
-    // Epic -> Epic+1 (2x = 54) -> Epic+2 (2x = 108) -> Legendary (2x = 216)
-    // Legendary+1 (2x = 432) -> Legendary+2 (2x = 864) -> Legendary+3 (2x = 1728) -> Mythic (2x = 3456)
-    const RUNE_TIERS = [
-      { id: 'common', name: 'Звичайний', sub: 'Common', grayMult: 1, colorClass: 'color-common', bgClass: 'bg-common', icon: '1' },
-      { id: 'great', name: 'Незвичайний', sub: 'Great', grayMult: 3, colorClass: 'color-great', bgClass: 'bg-great', icon: '2' },
-      { id: 'rare', name: 'Рідкісний', sub: 'Rare', grayMult: 9, colorClass: 'color-rare', bgClass: 'bg-rare', icon: '3' },
-      { id: 'epic', name: 'Епічний', sub: 'Epic', grayMult: 27, colorClass: 'color-epic', bgClass: 'bg-epic', icon: '4' },
-      { id: 'epic_1', name: 'Епічний +1', sub: 'Epic +1', grayMult: 54, colorClass: 'color-epic', bgClass: 'bg-epic', icon: '5' },
-      { id: 'epic_2', name: 'Епічний +2', sub: 'Epic +2', grayMult: 108, colorClass: 'color-epic', bgClass: 'bg-epic', icon: '6' },
-      { id: 'legendary', name: 'Легендарний', sub: 'Legendary', grayMult: 216, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: '7' },
-      { id: 'legendary_1', name: 'Легенд. +1', sub: 'Legendary +1', grayMult: 432, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: '8' },
-      { id: 'legendary_2', name: 'Легенд. +2', sub: 'Legendary +2', grayMult: 864, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: '9' },
-      { id: 'legendary_3', name: 'Легенд. +3', sub: 'Legendary +3', grayMult: 1728, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: '10' },
-      { id: 'mythic', name: 'Міфічний', sub: 'Mythic', grayMult: 3456, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: '11' }
-    ];
-
-    // --- APP STATE ---
-    let currentMode = 'gear'; // 'gear' or 'runes'
-    let selectedGearTarget = 'mythic_1'; // Default as in mockup
-    let selectedRuneTarget = 'mythic';
-
-    // Gear inventory: initial example from mockup has 1x Legendary +3
-    let gearInventory = {
-      legendary_3: 1,
-      epic_fodder: 0,
-      legendary_fodder: 0
+    // Rarity colors: a = light, b = base, d = dark
+    const FR = {
+      C: { a: '#9aa4b6', b: '#5d6778', d: '#2b313d' },
+      F: { a: '#4fd36a', b: '#1f8a39', d: '#0d3d18' },
+      R: { a: '#4f9bff', b: '#1f5fc4', d: '#0c2a5c' },
+      E: { a: '#b06cf0', b: '#6e2bb8', d: '#33115e' },
+      L: { a: '#ffcc4d', b: '#e08a00', d: '#6b3d00' },
+      M: { a: '#ff6a5c', b: '#c4241d', d: '#560908' }
     };
 
-    // Rune inventory
-    let runeInventory = {
-      legendary: 1
+    // --- S-GEAR ---
+    const GEAR = [
+      { id: 'E', label: 'Епічний', r: 'E', n: 0 },
+      { id: 'E1', label: 'Епічний +1', r: 'E', n: 1, down: true },
+      { id: 'E2', label: 'Епічний +2', r: 'E', n: 2, down: true },
+      { id: 'L', label: 'Легендарний', r: 'L', n: 0 },
+      { id: 'L1', label: 'Легендарний +1', r: 'L', n: 1 },
+      { id: 'L2', label: 'Легендарний +2', r: 'L', n: 2 },
+      { id: 'L3', label: 'Легендарний +3', r: 'L', n: 3 },
+      { id: 'M', label: 'Міфічний', r: 'M', n: 0 },
+      { id: 'M1', label: 'Міфічний +1', r: 'M', n: 1 },
+      { id: 'M2', label: 'Міфічний +2', r: 'M', n: 2 },
+      { id: 'M3', label: 'Міфічний +3', r: 'M', n: 3 },
+      { id: 'M4', label: 'Міфічний +4', r: 'M', n: 4 }
+    ];
+    // ef / lf = epic / legendary fodder consumed by this merge
+    const GEAR_R = {
+      E1: { parts: ['E'], ef: 1 }, E2: { parts: ['E1'], ef: 2 }, L: { parts: ['E2', 'E2'] },
+      L1: { parts: ['L'], lf: 1 }, L2: { parts: ['L1'], lf: 1 }, L3: { parts: ['L2'], lf: 2 },
+      M: { parts: ['L3', 'L3'] }, M1: { parts: ['M', 'L3'] }, M2: { parts: ['M1', 'L3'] },
+      M3: { parts: ['M2', 'L3'] }, M4: { parts: ['M3', 'L3'] }
+    };
+    // Gear levels with their own icon; M1–M4 reuse M.png plus a number badge
+    const GEAR_IMG = new Set(['E', 'E1', 'E2', 'L', 'L1', 'L2', 'L3', 'M']);
+
+    // --- RUNES (Etched / Blessing) ---
+    const RUNE = [
+      { id: 'C', label: 'Звичайна', r: 'C', n: 0 },
+      { id: 'F', label: 'Якісна', r: 'F', n: 0 },
+      { id: 'R', label: 'Рідкісна', r: 'R', n: 0 },
+      { id: 'E', label: 'Епічна', r: 'E', n: 0 },
+      { id: 'E1', label: 'Епічна +1', r: 'E', n: 1 },
+      { id: 'E2', label: 'Епічна +2', r: 'E', n: 2 },
+      { id: 'L', label: 'Легендарна', r: 'L', n: 0 },
+      { id: 'L1', label: 'Легендарна +1', r: 'L', n: 1 },
+      { id: 'L2', label: 'Легендарна +2', r: 'L', n: 2 },
+      { id: 'L3', label: 'Легендарна +3', r: 'L', n: 3 },
+      { id: 'M', label: 'Міфічна', r: 'M', n: 0 }
+    ];
+    const rr = (n, id) => ({ parts: Array(n).fill(id) });
+    const RUNE_R = {
+      F: rr(3, 'C'), R: rr(3, 'F'), E: rr(3, 'R'), E1: rr(2, 'E'), E2: rr(2, 'E1'),
+      L: rr(2, 'E2'), L1: rr(2, 'L'), L2: rr(2, 'L1'), L3: rr(2, 'L2'), M: rr(2, 'L3')
     };
 
-    // Load saved state from localStorage if available
+    // Low (non-S) items merge into epic fodder: grey ×3 → green ×3 → blue ×3 → epic.
+    // w = value in grey items
+    const LOW = [
+      { id: 'R', label: 'Синій предмет', many: 'синіх', r: 'R', w: 9 },
+      { id: 'F', label: 'Зелений предмет', many: 'зелених', r: 'F', w: 3 },
+      { id: 'C', label: 'Сірий предмет', many: 'сірих', r: 'C', w: 1 }
+    ];
+    const GREY_PER_EPIC = 27;
+    const LOW_BY = Object.fromEntries(LOW.map(l => [l.id, l]));
+
+    // Merge steps to build n epic fodder from low items: uses what's in the pool,
+    // the missing greys are assumed to be collected.
+    function lowChain(n, inv) {
+      const pool = { C: inv.C, F: inv.F, R: inv.R };
+      const merges = { F: 0, R: 0, E: 0 };
+      const below = { E: 'R', R: 'F', F: 'C' };
+      function go(id) {
+        if (id !== 'E' && pool[id] > 0) { pool[id]--; return; }
+        if (id === 'C') return;
+        merges[id]++;
+        for (let i = 0; i < 3; i++) go(below[id]);
+      }
+      for (let i = 0; i < n; i++) go('E');
+      const T = id => id === 'E' ? tile('fodder', FOD.E, 44) : tile('item', LOW_BY[id], id === 'C' ? 38 : 44);
+      return ['F', 'R', 'E'].filter(id => merges[id]).map(id => ({
+        times: merges[id],
+        parts: [0, 1, 2].map(() => tile('item', LOW_BY[below[id]], 38)),
+        result: T(id),
+        label: id === 'E' ? 'Епічний фураж' : LOW_BY[id].label
+      }));
+    }
+
+    const MODES = {
+      gear: { levels: GEAR, recipes: GEAR_R, kind: 'gear' },
+      rune: { levels: RUNE, recipes: RUNE_R, kind: 'rune' }
+    };
+
+    // Top-down recursion: take ready items from the inventory pool, otherwise merge from parts.
+    function solve(recipes, target, inv) {
+      const pool = { ...inv };
+      const acc = { base: 0, ef: 0, lf: 0, merges: {} };
+      function go(id, top) {
+        if (!top && (pool[id] || 0) > 0) { pool[id]--; return; }
+        const r = recipes[id];
+        if (!r) { acc.base++; return; } // base unit: S copy (Epic) or common rune C
+        acc.merges[id] = (acc.merges[id] || 0) + 1;
+        r.parts.forEach(p => go(p, false));
+        acc.ef += r.ef || 0;
+        acc.lf += r.lf || 0;
+      }
+      go(target, true);
+      return { acc, left: pool };
+    }
+
+    // --- STATE ---
+    const STORE_KEY = 'archero2_calc_v2';
+    const state = {
+      mode: 'gear',
+      t: { gear: 8, rune: 10 },
+      inv: { gear: {}, rune: {} },
+      // S-gear fodder: epic / legendary fodder + low items (C, F, R) that merge into epic fodder
+      fod: { ef: 0, lf: 0, C: 0, F: 0, R: 0 }
+    };
     try {
-      const savedMode = localStorage.getItem('archero2_calc_mode');
-      if (savedMode) currentMode = savedMode;
-      const savedGearTarget = localStorage.getItem('archero2_gear_target');
-      if (savedGearTarget) selectedGearTarget = savedGearTarget;
-      const savedGearInv = localStorage.getItem('archero2_gear_inv');
-      if (savedGearInv) gearInventory = JSON.parse(savedGearInv);
-      const savedRuneTarget = localStorage.getItem('archero2_rune_target');
-      if (savedRuneTarget) selectedRuneTarget = savedRuneTarget;
-      const savedRuneInv = localStorage.getItem('archero2_rune_inv');
-      if (savedRuneInv) runeInventory = JSON.parse(savedRuneInv);
-    } catch(e) {}
-
-    function saveState() {
-      try {
-        localStorage.setItem('archero2_calc_mode', currentMode);
-        localStorage.setItem('archero2_gear_target', selectedGearTarget);
-        localStorage.setItem('archero2_gear_inv', JSON.stringify(gearInventory));
-        localStorage.setItem('archero2_rune_target', selectedRuneTarget);
-        localStorage.setItem('archero2_rune_inv', JSON.stringify(runeInventory));
-      } catch(e) {}
-    }
-
-    function setMode(mode) {
-      currentMode = mode;
-      document.getElementById('tabGear').classList.toggle('active', mode === 'gear');
-      document.getElementById('tabRunes').classList.toggle('active', mode === 'runes');
-      saveState();
-      renderAll();
-    }
-
-    function resetInventory() {
-      if (currentMode === 'gear') {
-        gearInventory = {};
-      } else {
-        runeInventory = {};
-      }
-      saveState();
-      renderAll();
-    }
-
-    function changeQty(key, delta) {
-      const inv = currentMode === 'gear' ? gearInventory : runeInventory;
-      const current = Math.max(0, parseInt(inv[key] || 0, 10));
-      const updated = Math.max(0, current + delta);
-      if (updated === 0) {
-        delete inv[key];
-      } else {
-        inv[key] = updated;
-      }
-      saveState();
-      renderAll();
-    }
-
-    function setDirectQty(key, val) {
-      const inv = currentMode === 'gear' ? gearInventory : runeInventory;
-      const parsed = Math.max(0, parseInt(val, 10) || 0);
-      if (parsed === 0) {
-        delete inv[key];
-      } else {
-        inv[key] = parsed;
-      }
-      saveState();
-      renderAll();
-    }
-
-    // --- RENDER 1: TARGET SELECTOR ---
-    function renderTargetSelector() {
-      const container = document.getElementById('targetGrid');
-      container.innerHTML = '';
-      const tiers = currentMode === 'gear' ? GEAR_TIERS : RUNE_TIERS;
-      const currentSelected = currentMode === 'gear' ? selectedGearTarget : selectedRuneTarget;
-      const isRune = currentMode === 'runes';
-
-      const targetObj = tiers.find(t => t.id === currentSelected) || tiers[tiers.length - 1];
-      document.getElementById('targetBadgeDisplay').innerText = `Ціль: ${targetObj.name}`;
-
-      tiers.forEach(t => {
-        const btn = document.createElement('div');
-        btn.className = `tier-chip ${t.id === currentSelected ? 'active' : ''}`;
-        btn.onclick = () => {
-          if (currentMode === 'gear') selectedGearTarget = t.id;
-          else selectedRuneTarget = t.id;
-          saveState();
-          renderAll();
-        };
-
-        btn.innerHTML = `
-          <div class="tier-icon-box ${t.bgClass} ${isRune ? 'hexagon' : ''}">
-            ${t.icon}
-          </div>
-          <div class="tier-chip-name ${t.colorClass}">${t.name}</div>
-          <div class="tier-chip-sub">${t.sub}</div>
-        `;
-        container.appendChild(btn);
-      });
-    }
-
-    // --- RENDER 2: INVENTORY SECTION ---
-    function renderInventory() {
-      const container = document.getElementById('inventoryList');
-      container.innerHTML = '';
-
-      if (currentMode === 'gear') {
-        const targetIndex = GEAR_TIERS.findIndex(t => t.id === selectedGearTarget);
-        // Available tiers to have are all tiers below the target
-        const availableTiers = GEAR_TIERS.slice(0, targetIndex).reverse();
-
-        // 1. Specific S-Gear tiers
-        availableTiers.forEach(t => {
-          const count = gearInventory[t.id] || 0;
-          const row = document.createElement('div');
-          row.className = 'inv-row';
-
-          row.innerHTML = `
-            <div class="inv-info">
-              <div class="inv-badge ${t.bgClass}">${t.icon}</div>
-              <div class="inv-name-box">
-                <div class="inv-name ${t.colorClass}">${t.name}</div>
-                <div class="inv-sub">
-                  ${t.sub}
-                  ${t.canDowngrade ? '<span class="downgrade-tag">можна понизити</span>' : ''}
-                </div>
-              </div>
-            </div>
-            <div class="stepper">
-              <button class="step-btn" onclick="changeQty('${t.id}', -1)">−</button>
-              <input type="number" class="step-input" value="${count}" min="0" onchange="setDirectQty('${t.id}', this.value)" />
-              <button class="step-btn" onclick="changeQty('${t.id}', 1)">+</button>
-            </div>
-          `;
-          container.appendChild(row);
-        });
-
-        // 2. Legendary Fodder row (if target is Legendary+1 or higher)
-        if (targetIndex >= 4) {
-          const legFodderCount = gearInventory['legendary_fodder'] || 0;
-          const rowLeg = document.createElement('div');
-          rowLeg.className = 'inv-row';
-          rowLeg.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-          rowLeg.innerHTML = `
-            <div class="inv-info">
-              <div class="inv-badge bg-legendary">LF</div>
-              <div class="inv-name-box">
-                <div class="inv-name color-legendary">Легендарний фураж</div>
-                <div class="inv-sub">Будь-який леґендарний корм (= 8 епіків)</div>
-              </div>
-            </div>
-            <div class="stepper">
-              <button class="step-btn" onclick="changeQty('legendary_fodder', -1)">−</button>
-              <input type="number" class="step-input" value="${legFodderCount}" min="0" onchange="setDirectQty('legendary_fodder', this.value)" />
-              <button class="step-btn" onclick="changeQty('legendary_fodder', 1)">+</button>
-            </div>
-          `;
-          container.appendChild(rowLeg);
+      const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+      if (saved) {
+        if (MODES[saved.mode]) state.mode = saved.mode;
+        for (const m of Object.keys(MODES)) {
+          const ti = saved.t && saved.t[m];
+          if (Number.isInteger(ti) && ti >= 1 && ti < MODES[m].levels.length) state.t[m] = ti;
+          if (saved.inv && saved.inv[m] && typeof saved.inv[m] === 'object') state.inv[m] = saved.inv[m];
         }
+        if (saved.fod) {
+          // a short-lived version kept fodder per mode: { item, gear }
+          const f = saved.fod.gear || saved.fod;
+          for (const k of Object.keys(state.fod)) state.fod[k] = Math.max(0, Math.floor(+f[k]) || 0);
+        }
+      }
+    } catch (e) {}
+    function save() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
 
-        // 3. Epic Fodder row
-        const epicFodderCount = gearInventory['epic_fodder'] || 0;
-        const rowEpic = document.createElement('div');
-        rowEpic.className = 'inv-row';
-        rowEpic.style.borderColor = 'rgba(168, 85, 247, 0.4)';
-        rowEpic.innerHTML = `
-          <div class="inv-info">
-            <div class="inv-badge bg-epic">EF</div>
-            <div class="inv-name-box">
-              <div class="inv-name color-epic">Епічний фураж</div>
-              <div class="inv-sub">Будь-яке епічне спорядження на корм</div>
-            </div>
-          </div>
-          <div class="stepper">
-            <button class="step-btn" onclick="changeQty('epic_fodder', -1)">−</button>
-            <input type="number" class="step-input" value="${epicFodderCount}" min="0" onchange="setDirectQty('epic_fodder', this.value)" />
-            <button class="step-btn" onclick="changeQty('epic_fodder', 1)">+</button>
-          </div>
-        `;
-        container.appendChild(rowEpic);
+    const fmt = n => n.toLocaleString('uk-UA');
+    const $ = id => document.getElementById(id);
 
+    // --- TILE (icon) ---
+    // kind: 'item' | 'gear' (S) | 'rune' | 'fodder'
+    function tile(kind, lv, size) {
+      const c = FR[lv.r];
+      let src, sMark = false, badge = 0;
+      if (kind === 'rune') {
+        src = `icons/runes/${lv.id}.png`;
+      } else if (kind === 'item') {
+        src = `icons/gear/${lv.id}.png`;
+      } else if (kind === 'fodder') {
+        src = `icons/gear/fod${lv.r}.png`;
       } else {
-        // Runes Inventory
-        const targetIndex = RUNE_TIERS.findIndex(t => t.id === selectedRuneTarget);
-        const availableTiers = RUNE_TIERS.slice(0, targetIndex).reverse();
+        src = `icons/gear/${GEAR_IMG.has(lv.id) ? lv.id : 'M'}.png`;
+        sMark = size >= 32;
+        badge = lv.n;
+      }
+      const framed = kind !== 'rune';
+      const img = `<img src="${src}" alt="" loading="lazy">`;
+      return `<span class="tile${framed ? ' framed r-' + lv.r : ''}" style="--s:${size}px;--ra:${c.a};--rb:${c.b};--rd:${c.d}">` +
+        (framed ? `<span class="face">${img}</span>` : img) +
+        (sMark ? '<span class="s-mark" aria-hidden="true">S</span>' : '') +
+        (badge ? `<span class="lvl" aria-hidden="true">${badge}</span>` : '') +
+        `</span>`;
+    }
+    const FOD = { E: { r: 'E' }, L: { r: 'L' } };
 
-        availableTiers.forEach(t => {
-          const count = runeInventory[t.id] || 0;
-          const row = document.createElement('div');
-          row.className = 'inv-row';
+    function stepperRow(icon, label, extra, count, key, bump) {
+      return `<div class="row">
+        ${icon}
+        <span class="row-name">${label}${extra}</span>
+        <button class="step minus btn" data-step="${key}" data-d="-1" aria-label="Менше: ${label}">−</button>
+        <input class="count${bump ? ' bump' : ''}" type="number" min="0" inputmode="numeric" data-key="${key}" value="${count}" aria-label="Кількість: ${label}">
+        <button class="step plus btn" data-step="${key}" data-d="1" aria-label="Більше: ${label}">+</button>
+      </div>`;
+    }
 
-          row.innerHTML = `
-            <div class="inv-info">
-              <div class="inv-badge hexagon ${t.bgClass}">${t.icon}</div>
-              <div class="inv-name-box">
-                <div class="inv-name ${t.colorClass}">${t.name}</div>
-                <div class="inv-sub">${t.sub} (Рівень ${t.icon})</div>
-              </div>
-            </div>
-            <div class="stepper">
-              <button class="step-btn" onclick="changeQty('${t.id}', -1)">−</button>
-              <input type="number" class="step-input" value="${count}" min="0" onchange="setDirectQty('${t.id}', this.value)" />
-              <button class="step-btn" onclick="changeQty('${t.id}', 1)">+</button>
-            </div>
-          `;
-          container.appendChild(row);
-        });
+    // --- RENDER ---
+    function calc() {
+      const m = MODES[state.mode];
+      const ti = state.t[state.mode];
+      const target = m.levels[ti];
+      const inv = state.inv[state.mode];
+      const full = solve(m.recipes, target.id, {}).acc;
+      const res = solve(m.recipes, target.id, inv).acc;
+      return { m, ti, target, inv, full, res };
+    }
+
+    function renderTop() {
+      const { m, ti, target } = calc();
+      document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === state.mode)));
+      $('picked').textContent = 'Обрано: ' + target.label;
+      $('targets').innerHTML = m.levels.slice(1).map((lv, j) => {
+        const i = j + 1;
+        return `<button class="target btn" data-target="${i}" aria-pressed="${i === ti}" aria-label="${lv.label}">
+          ${tile(m.kind, lv, 54)}
+          <span class="target-name">${lv.label}</span>
+        </button>`;
+      }).join('');
+    }
+
+    function renderInv(bump) {
+      const { m, ti, inv, full } = calc();
+      $('invRows').innerHTML = m.levels.slice(0, ti).reverse().map(lv =>
+        stepperRow(tile(m.kind, lv, 44), lv.label, lv.down ? '<span class="down">можна понизити</span>' : '',
+          inv[lv.id] || 0, 'inv:' + lv.id, bump)
+      ).join('');
+
+      const fb = $('fodderBlock');
+      if (state.mode === 'gear') {
+        const fod = state.fod;
+        const rows = [{ k: 'lf', label: 'Легендарний фураж', r: 'L', need: full.lf }, { k: 'ef', label: 'Епічний фураж', r: 'E', need: full.ef }]
+          .filter(f => f.need > 0 || fod[f.k] > 0)
+          .map(f => stepperRow(tile('fodder', FOD[f.r], 44), f.label, '', fod[f.k], 'fod:' + f.k, bump));
+        const low = LOW.map(l => stepperRow(tile('item', l, 44), l.label, '', fod[l.id], 'fod:' + l.id, bump));
+        fb.innerHTML = '<span class="caps">Фураж (будь-які предмети тієї ж рідкості)</span>' + rows.join('') +
+          '<span class="caps" style="margin-top:6px">Нижчі предмети → епічний фураж</span>' +
+          '<p class="hint" style="font-size:13px">3 однакових сірих → зелений, 3 зелених → синій, 3 синіх → епічний.</p>' +
+          low.join('');
+        fb.hidden = false;
+      } else {
+        fb.innerHTML = '';
+        fb.hidden = true;
       }
     }
 
-    // --- RENDER 3: WHAT YOU STILL NEED & PATH ---
-    function renderSummaryAndPath() {
-      const summaryGrid = document.getElementById('summaryGrid');
-      const pathSteps = document.getElementById('pathSteps');
-      summaryGrid.innerHTML = '';
-      pathSteps.innerHTML = '';
+    function renderResult(bump) {
+      const { m, target, full, res } = calc();
+      const mode = state.mode;
+      const c = FR[target.r];
+      const T = (lv, size) => tile(m.kind, lv, size);
+      const byId = Object.fromEntries(m.levels.map(l => [l.id, l]));
+      const b = bump ? ' bump' : '';
 
-      if (currentMode === 'gear') {
-        const target = GEAR_TIERS.find(t => t.id === selectedGearTarget);
-
-        // Calculate total provided by inventory
-        let ownedCopies = 0;
-        let ownedEpicFodder = Number(gearInventory['epic_fodder'] || 0);
-        let ownedLegFodder = Number(gearInventory['legendary_fodder'] || 0);
-
-        GEAR_TIERS.forEach(t => {
-          const cnt = Number(gearInventory[t.id] || 0);
-          if (cnt > 0) {
-            ownedCopies += t.copies * cnt;
-            ownedEpicFodder += t.epicFodder * cnt;
-            ownedLegFodder += t.legFodder * cnt;
+      let needs, pct, done, mbar, lowSteps = [];
+      if (mode === 'gear') {
+        const fod = state.fod;
+        const lowGrey = LOW.reduce((a, l) => a + fod[l.id] * l.w, 0);
+        const fromLow = Math.floor(lowGrey / GREY_PER_EPIC);
+        const haveE = fod.ef + fromLow;
+        const needEF = Math.max(0, res.ef - haveE);
+        // spare epic fodder goes to legendary fodder: 1 legendary = 8 epic
+        const spareE = Math.max(0, haveE - res.ef);
+        const lfShort = Math.max(0, res.lf - fod.lf);
+        const lfFromSpare = Math.min(lfShort, Math.floor(spareE / 8));
+        const needLF = lfShort - lfFromSpare;
+        const epicForLF = needLF ? needLF * 8 - (spareE - lfFromSpare * 8) : 0;
+        // epic fodder still to build (for both fodder kinds) and its cost in grey items
+        const epicToBuild = Math.max(0, res.ef + lfShort * 8 - fod.ef);
+        const greyLeft = Math.max(0, epicToBuild * GREY_PER_EPIC - lowGrey);
+        const gaps = [needEF && needEF + ' епічних', needLF && needLF + ' легендарних'].filter(Boolean).join(' і ');
+        needs = [
+          { label: 'Копій S-предмета', value: res.base,
+            sub: 'всього ' + full.base + (full.base > res.base ? ' · ' + (full.base - res.base) + ' вже є в інвентарі' : ' · епічних, той самий предмет'),
+            color: FR.E.d, icon: tile('gear', GEAR[0], 40) },
+          { label: 'Епічний фураж', value: needEF,
+            sub: 'з ' + res.ef + ' потрібних' + (fromLow ? ' · ' + fromLow + ' з нижчих' : '') +
+              (lfFromSpare ? ' · ' + lfFromSpare * 8 + ' зайвих → на легендарний' : ''),
+            color: FR.E.d, icon: tile('fodder', FOD.E, 40) },
+          full.lf && { label: 'Легендарний фураж', value: needLF,
+            sub: 'з ' + res.lf + (lfFromSpare ? ' · ' + lfFromSpare + ' зі зайвих епічних' : '') +
+              (needLF ? ' · = ' + fmt(epicForLF) + ' епічних' : ''),
+            color: FR.L.d, icon: tile('fodder', FOD.L, 40) },
+          greyLeft && {
+            wide: true, label: 'Або зібрати фураж з нижчих',
+            html: LOW.map(l => `<span class="need-val">${tile('item', l, 40)}<span class="need-num${b}" style="--nc:${FR[l.r].d}">${fmt(Math.ceil(greyLeft / l.w))}</span><span class="need-unit">${l.many}</span></span>`)
+              .join('<span class="need-or">або</span>'),
+            sub: 'Скільки ще треба, щоб закрити ' + (gaps || 'фураж') + ' фуражів (1 легендарний = 8 епічних), з урахуванням того, що вже маєш'
           }
-        });
-
-        // Total target requirements
-        const reqCopies = target.copies;
-        const reqEpic = target.epicFodder;
-        const reqLeg = target.legFodder;
-
-        // Still needed
-        const remCopies = Math.max(0, reqCopies - ownedCopies);
-        const remEpic = Math.max(0, reqEpic - ownedEpicFodder);
-        const remLeg = Math.max(0, reqLeg - ownedLegFodder);
-
-        // Progress calculation based on total Epic equivalent points
-        // 1 S copy = ~38 Epic equiv, 1 Leg Fodder = 8 Epic, 1 Epic Fodder = 1 Epic
-        const totalPointsTarget = (reqCopies * 38) + (reqLeg * 8) + reqEpic;
-        const totalPointsOwned = (ownedCopies * 38) + (ownedLeg * 8) + ownedEpicFodder;
-        const pct = totalPointsTarget > 0 ? Math.min(100, Math.round((totalPointsOwned / totalPointsTarget) * 100)) : 100;
-
-        document.getElementById('progressPct').innerText = `${pct}%`;
-        document.getElementById('progressBar').style.width = `${pct}%`;
-
-        // 3 Summary Cards
-        summaryGrid.innerHTML = `
-          <div class="summary-card">
-            <div class="summary-label">
-              <span>🟡</span> Копії S-предмета
-            </div>
-            <div class="summary-value" style="color: #ffd166;">${remCopies} шт.</div>
-            <div class="summary-hint">Потрібно: ${reqCopies} | Є в наявності: ${ownedCopies}</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">
-              <span>🟣</span> Епічний фураж
-            </div>
-            <div class="summary-value" style="color: var(--c-epic);">${remEpic} шт.</div>
-            <div class="summary-hint">Потрібно: ${reqEpic} | Є в наявності: ${ownedEpicFodder}</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">
-              <span>🟠</span> Легендарний фураж
-            </div>
-            <div class="summary-value" style="color: var(--c-legendary);">${remLeg} шт.</div>
-            <div class="summary-hint">Потрібно: ${reqLeg} | Є в наявності: ${ownedLegFodder}</div>
-          </div>
-        `;
-
-        // Synthesis Path
-        const targetIndex = GEAR_TIERS.findIndex(t => t.id === selectedGearTarget);
-        const steps = [
-          { target: 'E+1', formula: '1× Епічний (той самий) + 1× Епічний фураж' },
-          { target: 'E+2', formula: '1× Епічний +1 + 2× Епічний фураж' },
-          { target: 'L (Легендарний)', formula: '2× Епічний +2 (обидва той самий S-предмет)' },
-          { target: 'L+1', formula: '1× Легендарний + 1× Легендарний фураж' },
-          { target: 'L+2', formula: '1× Легендарний +1 + 1× Легендарний фураж' },
-          { target: 'L+3', formula: '1× Легендарний +2 + 2× Легендарний фураж' },
-          { target: 'M (Міфічний)', formula: '2× Легендарний +3 (обидва той самий S-предмет)' },
-          { target: 'M+1', formula: '1× Міфічний + 1× Легендарний +3 (той самий)' },
-          { target: 'M+2', formula: '1× Міфічний +1 + 1× Легендарний +3 (той самий)' },
-          { target: 'M+3', formula: '1× Міфічний +2 + 1× Легендарний +3 (той самий)' },
-          { target: 'M+4', formula: '1× Міфічний +3 + 1× Легендарний +3 (той самий)' }
-        ];
-
-        steps.slice(0, targetIndex).forEach((step, idx) => {
-          const card = document.createElement('div');
-          card.className = 'path-card';
-          card.innerHTML = `
-            <div class="path-target">
-              <span class="pill bg-legendary">Крок ${idx + 1}</span>
-              <span>→ ${step.target}</span>
-            </div>
-            <div class="path-reqs">
-              <span style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${step.formula}</span>
-            </div>
-          `;
-          pathSteps.appendChild(card);
-        });
-
+        ].filter(Boolean);
+        lowSteps = lowChain(epicToBuild, fod);
+        if (lfShort) {
+          lowSteps.push({
+            times: lfShort,
+            parts: [`<span class="op">8×</span>${tile('fodder', FOD.E, 38)}`],
+            result: tile('fodder', FOD.L, 44),
+            label: 'Легендарний фураж'
+          });
+        }
+        // progress in epic units: copy = 8, legendary fodder = 8, low items count fractionally
+        const fullU = full.base * 8 + full.ef + full.lf * 8;
+        const remU = res.base * 8 + Math.max(0, res.ef + lfShort * 8 - fod.ef - lowGrey / GREY_PER_EPIC);
+        pct = fullU ? Math.round((1 - remU / fullU) * 100) : 100;
+        done = remU === 0;
+        mbar = 'Ще ' + res.base + ' копій · ' + needEF + ' + ' + needLF + ' фуражу';
       } else {
-        // Runes summary & path
-        const target = RUNE_TIERS.find(t => t.id === selectedRuneTarget);
-        let ownedGray = 0;
-
-        RUNE_TIERS.forEach(t => {
-          const cnt = Number(runeInventory[t.id] || 0);
-          if (cnt > 0) {
-            ownedGray += t.grayMult * cnt;
-          }
-        });
-
-        const reqGray = target.grayMult;
-        const remGray = Math.max(0, reqGray - ownedGray);
-        const remRare = (remGray / 9).toFixed(1).replace('.0', '');
-        const remEpic = (remGray / 27).toFixed(1).replace('.0', '');
-
-        const pct = reqGray > 0 ? Math.min(100, Math.round((ownedGray / reqGray) * 100)) : 100;
-
-        document.getElementById('progressPct').innerText = `${pct}%`;
-        document.getElementById('progressBar').style.width = `${pct}%`;
-
-        summaryGrid.innerHTML = `
-          <div class="summary-card">
-            <div class="summary-label">
-              <span>⚪</span> Залишилось звичайних рун
-            </div>
-            <div class="summary-value" style="color: #ffd166;">${remGray.toLocaleString()} шт.</div>
-            <div class="summary-hint">Всього еквівалент цілі: ${reqGray.toLocaleString()}</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">
-              <span>🔵</span> Рідкісний еквівалент (Rare)
-            </div>
-            <div class="summary-value" style="color: var(--c-rare);">${remRare} шт.</div>
-            <div class="summary-hint">1 Рідкісна = 9 Звичайних</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">
-              <span>🟣</span> Епічний еквівалент (Epic)
-            </div>
-            <div class="summary-value" style="color: var(--c-epic);">${remEpic} шт.</div>
-            <div class="summary-hint">1 Епічна = 27 Звичайних</div>
-          </div>
-        `;
-
-        const targetIndex = RUNE_TIERS.findIndex(t => t.id === selectedRuneTarget);
-        const runeSteps = [
-          'Зелена (Great) ← 3× Звичайна (той самий вид)',
-          'Синя (Rare) ← 3× Зелена (той самий вид)',
-          'Епічна (Epic) ← 3× Синя (той самий вид)',
-          'Епічна +1 ← 2× Епічна (той самий вид)',
-          'Епічна +2 ← 2× Епічна +1 (той самий вид)',
-          'Легендарна ← 2× Епічна +2 (той самий вид)',
-          'Легендарна +1 ← 2× Легендарна (той самий вид)',
-          'Легендарна +2 ← 2× Легендарна +1 (той самий вид)',
-          'Легендарна +3 ← 2× Легендарна +2 (той самий вид)',
-          'Міфічна ← 2× Легендарна +3 (той самий вид)'
+        const merges = Object.values(res.merges).reduce((a, v) => a + v, 0);
+        needs = [
+          { label: 'Звичайних рун', value: res.base, sub: 'точних дублікатів · всього ' + fmt(full.base), color: FR.C.d, icon: tile('rune', RUNE[0], 40) },
+          { label: 'Злиттів', value: merges, sub: 'кроків до цілі', color: FR.M.d, icon: T(target, 40) }
         ];
-
-        runeSteps.slice(0, targetIndex).forEach((step, idx) => {
-          const card = document.createElement('div');
-          card.className = 'path-card';
-          card.innerHTML = `
-            <div class="path-target">
-              <span class="pill bg-great">Рівень ${idx + 2}</span>
-            </div>
-            <div class="path-reqs">
-              <span style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${step}</span>
-            </div>
-          `;
-          pathSteps.appendChild(card);
-        });
+        pct = full.base ? Math.round((1 - res.base / full.base) * 100) : 100;
+        done = res.base === 0;
+        mbar = 'Ще ' + fmt(res.base) + ' рун';
       }
+      pct = Math.max(0, Math.min(100, pct));
+      if (done) mbar = 'Готово до злиття!';
+
+      const mainSteps = m.levels.filter(lv => res.merges[lv.id]).map(lv => {
+        const r = m.recipes[lv.id];
+        const parts = r.parts.map(pid => T(byId[pid], 38));
+        for (let i = 0; i < (r.ef || 0); i++) parts.push(tile('fodder', FOD.E, 38));
+        for (let i = 0; i < (r.lf || 0); i++) parts.push(tile('fodder', FOD.L, 38));
+        return { times: res.merges[lv.id], parts, result: T(lv, 44), label: lv.label };
+      });
+      const steps = [...lowSteps, ...mainSteps].map(s => `<li>
+          <span class="times${b}">×${fmt(s.times)}</span>
+          ${s.parts.join('<span class="op" aria-hidden="true">+</span>')}
+          <span class="op" aria-hidden="true" style="margin:0 2px">=</span>
+          ${s.result}
+          <span class="step-label">${s.label}</span>
+        </li>`).join('');
+
+      const el = $('result');
+      el.style.setProperty('--rb', c.b);
+      el.style.setProperty('--rglow', c.b + '66');
+      el.innerHTML = `
+        ${done ? `<span class="spark" style="top:18px;left:12%;animation-delay:0s" aria-hidden="true"></span>
+                  <span class="spark" style="top:40px;right:14%;animation-delay:.5s" aria-hidden="true"></span>
+                  <span class="spark" style="top:90px;left:46%;animation-delay:1s" aria-hidden="true"></span>` : ''}
+        <div class="result-head">
+          ${T(target, 76)}
+          <div style="flex:1 1 auto;min-width:0">
+            <span class="caps">3. Ще потрібно для</span>
+            <h2 class="lf stroke">${target.label}</h2>
+          </div>
+        </div>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Прогрес до цілі">
+          <div class="bar-fill${done ? ' full' : ''}" style="width:${pct}%"></div>
+          <span class="bar-pct lf stroke">${pct}%</span>
+        </div>
+        ${done ? '<p class="ready lf stroke">Готово до злиття!</p>' : ''}
+        <div class="needs">
+          ${needs.map(n => `<div class="need${n.wide ? ' wide' : ''}">
+            <span class="caps">${n.label}</span>
+            ${n.wide ? `<div class="need-alts">${n.html}</div>`
+              : `<div class="need-val">${n.icon}<span class="need-num${b}" style="--nc:${n.color}">${fmt(n.value)}</span></div>`}
+            <span class="need-sub">${n.sub}</span>
+          </div>`).join('')}
+        </div>
+        <div class="path">
+          <span class="caps">Шлях злиття · знизу вгору</span>
+          <ol>${steps}</ol>
+        </div>
+        <p class="footnote">${{
+          gear: 'S-предмет випадає щонайменше епічним. 1 легендарний фураж = 8 епічних, 1 епічний фураж = 27 сірих (3 → 1 на кожному кроці). Від Легендарного +1 і вище понизити рівень вже не можна.',
+          rune: 'Для злиття потрібні точні дублікати однієї руни. Etched і Blessing працюють однаково.'
+        }[mode]}</p>
+      `;
+
+      $('mbar').innerHTML = `${T(target, 40)}<span class="mbar-text lf">${mbar}</span><span class="mbar-pct lf">${pct}%</span>`;
     }
 
-    function renderAll() {
-      renderTargetSelector();
-      renderInventory();
-      renderSummaryAndPath();
+    function renderAll(bump) {
+      renderTop();
+      renderInv(bump);
+      renderResult(bump);
     }
 
-    // Initialize on page load
-    renderAll();
+    // --- EVENTS ---
+    function setCount(key, value) {
+      const [scope, id] = key.split(':');
+      const v = Math.max(0, Math.floor(value) || 0);
+      if (scope === 'fod') {
+        state.fod[id] = v;
+      } else {
+        const inv = { ...state.inv[state.mode] };
+        if (v) inv[id] = v; else delete inv[id];
+        state.inv[state.mode] = inv;
+      }
+      save();
+    }
+    function getCount(key) {
+      const [scope, id] = key.split(':');
+      return scope === 'fod' ? state.fod[id] : (state.inv[state.mode][id] || 0);
+    }
+
+    document.addEventListener('click', e => {
+      const t = e.target.closest('[data-mode],[data-target],[data-step],[data-action]');
+      if (!t) return;
+      if (t.dataset.mode) {
+        if (state.mode === t.dataset.mode) return;
+        state.mode = t.dataset.mode;
+        save();
+        renderAll(false);
+      } else if (t.dataset.target) {
+        state.t[state.mode] = +t.dataset.target;
+        save();
+        renderAll(true);
+      } else if (t.dataset.step) {
+        setCount(t.dataset.step, getCount(t.dataset.step) + +t.dataset.d);
+        renderInv(true);
+        renderResult(true);
+      } else if (t.dataset.action === 'reset') {
+        state.inv[state.mode] = {};
+        if (state.mode === 'gear') state.fod = { ef: 0, lf: 0, C: 0, F: 0, R: 0 };
+        save();
+        renderInv(true);
+        renderResult(true);
+      }
+    });
+    // Typing into a counter updates only the result, so the field keeps focus
+    document.addEventListener('input', e => {
+      if (!e.target.dataset.key) return;
+      setCount(e.target.dataset.key, +e.target.value);
+      renderResult(true);
+    });
+    document.addEventListener('change', e => {
+      if (!e.target.dataset.key) return;
+      e.target.value = getCount(e.target.dataset.key);
+    });
+    document.addEventListener('focusin', e => {
+      if (e.target.dataset.key) e.target.select();
+    });
+
+    renderAll(false);
   </script>
 </body>
 </html>
