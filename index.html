@@ -193,10 +193,49 @@
     .need-val { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .need-num { font-family: var(--lf); font-size: 42px; line-height: 1; color: #fff; -webkit-text-stroke: 7px var(--nc); paint-order: stroke fill; }
     .need-sub { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .need { position: relative; }
     .need.wide { grid-column: 1 / -1; }
+    .need-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .info {
+      position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; padding: 0;
+      border-radius: 50%; border: 2px solid #c9b48a; background: #fff;
+      font-family: var(--lf); font-size: 15px; line-height: 1; color: var(--muted);
+      box-shadow: 0 2px 0 #c9b48a;
+    }
+    .info::before { content: ''; position: absolute; inset: -9px; } /* 44px tap target */
+    .need.open .info { background: var(--ink); border-color: var(--ink); color: #fff; box-shadow: none; }
+    .need .caps { padding-right: 28px; }
+    .need-more {
+      grid-column: 1 / -1; padding: 12px 14px; border-radius: 16px;
+      background: #16203b; border: 2px solid var(--gold-text); color: #fff;
+    }
+    .need-more .caps { color: var(--gold-text); }
+    .need-more dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+    .need-more dt { font-weight: 700; color: var(--soft); }
+    .need-more dd { margin: 0; font-weight: 900; color: #fff; text-align: right; }
+    .more {
+      align-self: flex-start; border: 2px dashed #d6c39b; background: transparent; border-radius: 12px;
+      padding: 8px 14px; min-height: 44px; font-size: 14px; font-weight: 800; color: #8a4b0a;
+    }
+    .more:hover { background: #fff3d1; }
+    @media (min-width: 900px) {
+      .result {
+        position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto;
+        overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #4a5786 transparent;
+      }
+      .result > * { flex-shrink: 0; }
+    }
     .need-alts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
     .need-unit { margin-left: 2px; font-size: 14px; font-weight: 800; color: var(--muted); }
     .need-alts .need-num { margin-right: 4px; }
+    .op-dark { color: var(--muted); font-size: 20px; }
+    .alt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; width: 100%; }
+    .alt {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 12px;
+      background: #fff; border: 2px solid #eadcbf; min-width: 0;
+    }
+    .alt-num { font-family: var(--lf); font-size: 20px; color: var(--ink); }
+    .alt-name { flex: 1 1 auto; min-width: 0; font-size: 12px; font-weight: 800; color: var(--muted); text-align: right; line-height: 1.1; }
     .need-or { font-size: 13px; font-weight: 900; text-transform: uppercase; color: #a8916a; }
 
     .path { display: flex; flex-direction: column; gap: 8px; }
@@ -413,6 +452,28 @@
       return { acc, left: pool };
     }
 
+    // Missing pieces of the target: the biggest parts of the merge tree that use nothing
+    // from the inventory, i.e. items you still have to get (ready or built from scratch).
+    function missingPieces(recipes, target, inv) {
+      const pool = { ...inv };
+      const pieces = {};
+      function go(id, top) {
+        if (!top && (pool[id] || 0) > 0) { pool[id]--; return true; }
+        const r = recipes[id];
+        if (!r) return false;
+        const used = r.parts.map(p => go(p, false));
+        if (top || used.some(Boolean)) {
+          r.parts.forEach((p, i) => { if (!used[i]) pieces[p] = (pieces[p] || 0) + 1; });
+          return true;
+        }
+        return false;
+      }
+      go(target, true);
+      return pieces;
+    }
+
+    const RUNE_COST = Object.fromEntries(RUNE.map(lv => [lv.id, solve(RUNE_R, lv.id, {}).acc.base]));
+
     // --- STATE ---
     const STORE_KEY = 'archero2_calc_v2';
     const state = {
@@ -505,12 +566,26 @@
       }).join('');
     }
 
+    // UI-only state (not saved): expanded lists, rows touched this session, opened card details
+    const ui = { allLevels: false, low: false, touched: new Set(), info: null };
+    const NEAREST = 3; // levels right below the target that are always visible
+
+    function toggleBtn(action, text) {
+      return `<button class="more btn" data-action="${action}">${text}</button>`;
+    }
+
     function renderInv(bump) {
       const { m, ti, inv, full } = calc();
-      $('invRows').innerHTML = m.levels.slice(0, ti).reverse().map(lv =>
+      const below = m.levels.slice(0, ti).reverse();
+      const visible = ui.allLevels ? below : below.filter((lv, i) =>
+        i < NEAREST || (inv[lv.id] || 0) > 0 || ui.touched.has('inv:' + lv.id));
+      const hidden = below.length - visible.length;
+      $('invRows').innerHTML = visible.map(lv =>
         stepperRow(tile(m.kind, lv, 44), lv.label, lv.down ? '<span class="down">можна понизити</span>' : '',
           inv[lv.id] || 0, 'inv:' + lv.id, bump)
-      ).join('');
+      ).join('') +
+        (hidden ? toggleBtn('all-levels', `Показати всі рівні · ще ${hidden}`)
+          : (ui.allLevels && below.length > NEAREST ? toggleBtn('all-levels', 'Згорнути порожні') : ''));
 
       const fb = $('fodderBlock');
       if (state.mode === 'gear') {
@@ -518,11 +593,15 @@
         const rows = [{ k: 'lf', label: 'Легендарний фураж', r: 'L', need: full.lf }, { k: 'ef', label: 'Епічний фураж', r: 'E', need: full.ef }]
           .filter(f => f.need > 0 || fod[f.k] > 0)
           .map(f => stepperRow(tile('fodder', FOD[f.r], 44), f.label, '', fod[f.k], 'fod:' + f.k, bump));
-        const low = LOW.map(l => stepperRow(tile('item', l, 44), l.label, '', fod[l.id], 'fod:' + l.id, bump));
-        fb.innerHTML = '<span class="caps">Фураж (будь-які предмети тієї ж рідкості)</span>' + rows.join('') +
-          '<span class="caps" style="margin-top:6px">Нижчі предмети → епічний фураж</span>' +
-          '<p class="hint" style="font-size:13px">3 однакових сірих → зелений, 3 зелених → синій, 3 синіх → епічний.</p>' +
-          low.join('');
+        const lowUsed = LOW.some(l => fod[l.id] > 0 || ui.touched.has('fod:' + l.id));
+        const lowOpen = ui.low || lowUsed;
+        const low = lowOpen
+          ? '<span class="caps" style="margin-top:6px">Нижчі предмети → епічний фураж</span>' +
+            '<p class="hint" style="font-size:13px">3 однакових сірих → зелений, 3 зелених → синій, 3 синіх → епічний.</p>' +
+            LOW.map(l => stepperRow(tile('item', l, 44), l.label, '', fod[l.id], 'fod:' + l.id, bump)).join('') +
+            (lowUsed ? '' : toggleBtn('low', 'Сховати нижчі предмети'))
+          : toggleBtn('low', '+ Додати сірі, зелені, сині предмети');
+        fb.innerHTML = '<span class="caps">Фураж (будь-які предмети тієї ж рідкості)</span>' + rows.join('') + low;
         fb.hidden = false;
       } else {
         fb.innerHTML = '';
@@ -555,24 +634,36 @@
         const epicToBuild = Math.max(0, res.ef + lfShort * 8 - fod.ef);
         const greyLeft = Math.max(0, epicToBuild * GREY_PER_EPIC - lowGrey);
         const gaps = [needEF && needEF + ' епічних', needLF && needLF + ' легендарних'].filter(Boolean).join(' і ');
+        const lfHave = Math.min(fod.lf, res.lf);
+        const pieces = missingPieces(m.recipes, target.id, state.inv.gear);
+        const gapLv = m.levels.slice().reverse().filter(lv => pieces[lv.id]);
         needs = [
-          { label: 'Копій S-предмета', value: res.base,
-            sub: 'всього ' + full.base + (full.base > res.base ? ' · ' + (full.base - res.base) + ' вже є в інвентарі' : ' · епічних, той самий предмет'),
-            color: FR.E.d, icon: tile('gear', GEAR[0], 40) },
-          { label: 'Епічний фураж', value: needEF,
-            sub: 'з ' + res.ef + ' потрібних' + (fromLow ? ' · ' + fromLow + ' з нижчих' : '') +
-              (lfFromSpare ? ' · ' + lfFromSpare * 8 + ' зайвих → на легендарний' : ''),
-            color: FR.E.d, icon: tile('fodder', FOD.E, 40) },
-          full.lf && { label: 'Легендарний фураж', value: needLF,
-            sub: 'з ' + res.lf + (lfFromSpare ? ' · ' + lfFromSpare + ' зі зайвих епічних' : '') +
-              (needLF ? ' · = ' + fmt(epicForLF) + ' епічних' : ''),
-            color: FR.L.d, icon: tile('fodder', FOD.L, 40) },
+          gapLv.length && { id: 'sgap', wide: true, label: 'Ще не вистачає S-предметів',
+            html: gapLv.map(lv => `<span class="need-val">${T(lv, 44)}<span class="need-num${b}" style="--nc:${FR[lv.r].d}">${pieces[lv.id]}</span></span><span class="need-unit">${lv.label}</span>`)
+              .join('<span class="op op-dark">+</span>'),
+            sub: 'дістань готовими або збери — що для цього треба, нижче',
+            more: [['Що це', 'найбільші частини злиття, яких немає в інвентарі'],
+              ['Копій S для них і решти', res.base], ['Злиттів до цілі', Object.values(res.merges).reduce((a, v) => a + v, 0)]] },
+          { id: 'copies', label: 'Копій S-предмета', value: res.base, color: FR.E.d, icon: tile('gear', GEAR[0], 40),
+            sub: full.base > res.base ? `з ${full.base} · решта вже є` : 'той самий предмет',
+            more: [['Всього з нуля', full.base], ['Вже є в інвентарі', full.base - res.base],
+              ['Що це', 'епічні копії саме цього S-предмета']] },
+          full.lf && { id: 'lf', label: 'Легендарний фураж', value: needLF, color: FR.L.d, icon: tile('fodder', FOD.L, 40),
+            sub: needLF ? '= ' + fmt(epicForLF) + ' епічних' : 'з ' + res.lf,
+            more: [['Потрібно для злиття', res.lf], ['Є легендарного фуражу', lfHave],
+              lfFromSpare && ['Зі зайвих епічних', lfFromSpare], ['1 легендарний', '8 епічних']] },
+          { id: 'ef', label: 'Епічний фураж', value: needEF, color: FR.E.d, icon: tile('fodder', FOD.E, 40),
+            sub: 'з ' + res.ef,
+            more: [['Потрібно для злиття', res.ef], ['Є епічного фуражу', fod.ef],
+              fromLow && ['З нижчих предметів', fromLow],
+              lfFromSpare && ['Зайві → на легендарний', lfFromSpare * 8]] },
           greyLeft && {
-            wide: true, label: 'Або зібрати фураж з нижчих',
+            id: 'low', wide: true, label: 'Або з нижчих предметів',
             html: LOW.map(l => `<span class="need-val">${tile('item', l, 40)}<span class="need-num${b}" style="--nc:${FR[l.r].d}">${fmt(Math.ceil(greyLeft / l.w))}</span><span class="need-unit">${l.many}</span></span>`)
               .join('<span class="need-or">або</span>'),
-            sub: 'Скільки ще треба, щоб закрити ' + (gaps || 'фураж') + ' фуражів (1 легендарний = 8 епічних), з урахуванням того, що вже маєш'
-          }
+            sub: 'на вибір, щоб закрити фураж',
+            more: [['Закриває', (gaps || 'фураж') + ' фуражу'], ['Курс', '1 епічний = 3 синіх = 9 зелених = 27 сірих'],
+              ['Враховано', 'фураж і нижчі предмети з інвентарю']] }
         ].filter(Boolean);
         lowSteps = lowChain(epicToBuild, fod);
         if (lfShort) {
@@ -591,13 +682,31 @@
         mbar = 'Ще ' + res.base + ' копій · ' + needEF + ' + ' + needLF + ' фуражу';
       } else {
         const merges = Object.values(res.merges).reduce((a, v) => a + v, 0);
-        needs = [
-          { label: 'Звичайних рун', value: res.base, sub: 'точних дублікатів · всього ' + fmt(full.base), color: FR.C.d, icon: tile('rune', RUNE[0], 40) },
-          { label: 'Злиттів', value: merges, sub: 'кроків до цілі', color: FR.M.d, icon: T(target, 40) }
-        ];
+        // levels below the target, most valuable first, with their cost in common runes
+        const below = m.levels.slice(0, m.levels.indexOf(target)).reverse()
+          .map(lv => ({ lv, cost: RUNE_COST[lv.id] }));
+        // exact gap: greedy split of the missing common runes into the highest levels
+        let rest = res.base;
+        const gap = below.map(({ lv, cost }) => {
+          const n = Math.floor(rest / cost);
+          rest -= n * cost;
+          return { lv, n };
+        }).filter(g => g.n);
+        const chip = (lv, n, size) => `<span class="need-val">${T(lv, size)}<span class="need-num${b}" style="--nc:${FR[lv.r].d}">${fmt(n)}</span></span>`;
+        needs = res.base ? [
+          { id: 'gap', wide: true, label: 'Ще не вистачає',
+            html: gap.map(g => chip(g.lv, g.n, 44) + `<span class="need-unit">${g.lv.label}</span>`).join('<span class="op op-dark">+</span>'),
+            sub: 'точні дублікати тієї самої руни',
+            more: [['Всього з нуля', fmt(full.base) + ' звичайних'], ['Покрито інвентарем', fmt(full.base - res.base) + ' звичайних'],
+              ['Ще треба', fmt(res.base) + ' звичайних'], ['Злиттів до цілі', merges]] },
+          { id: 'alt', wide: true, label: 'Або лише руни одного рівня',
+            html: `<div class="alt-grid">${below.map(({ lv, cost }) =>
+              `<div class="alt">${T(lv, 34)}<span class="alt-num">${fmt(Math.ceil(res.base / cost))}</span><span class="alt-name">${lv.label}</span></div>`).join('')}</div>`,
+            sub: 'від найцінніших до найслабших' }
+        ] : [];
         pct = full.base ? Math.round((1 - res.base / full.base) * 100) : 100;
         done = res.base === 0;
-        mbar = 'Ще ' + fmt(res.base) + ' рун';
+        mbar = gap.length ? 'Ще ' + gap.map(g => g.n + '× ' + g.lv.id).join(' + ') : '';
       }
       pct = Math.max(0, Math.min(100, pct));
       if (done) mbar = 'Готово до злиття!';
@@ -637,12 +746,23 @@
         </div>
         ${done ? '<p class="ready lf stroke">Готово до злиття!</p>' : ''}
         <div class="needs">
-          ${needs.map(n => `<div class="need${n.wide ? ' wide' : ''}">
-            <span class="caps">${n.label}</span>
-            ${n.wide ? `<div class="need-alts">${n.html}</div>`
-              : `<div class="need-val">${n.icon}<span class="need-num${b}" style="--nc:${n.color}">${fmt(n.value)}</span></div>`}
-            <span class="need-sub">${n.sub}</span>
-          </div>`).join('')}
+          ${needs.map(n => {
+            const more = (n.more || []).filter(Boolean);
+            const open = more.length && ui.info === n.id;
+            return `<div class="need${n.wide ? ' wide' : ''}${open ? ' open' : ''}">
+              <span class="caps">${n.label}</span>
+              ${more.length ? `<button class="info btn" data-info="${n.id}" aria-expanded="${!!open}" aria-label="Детальніше: ${n.label}">${open ? '×' : 'i'}</button>` : ''}
+              ${n.wide ? `<div class="need-alts">${n.html}</div>`
+                : `<div class="need-val">${n.icon}<span class="need-num${b}" style="--nc:${n.color}">${fmt(n.value)}</span></div>`}
+              <span class="need-sub">${n.sub}</span>
+            </div>`;
+          }).join('')}
+          ${(() => {
+            const n = needs.find(x => x.id === ui.info && x.more);
+            if (!n) return '';
+            const rows = n.more.filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${typeof v === 'number' ? fmt(v) : v}</dd>`).join('');
+            return `<div class="need-more"><span class="caps">${n.label}</span><dl>${rows}</dl></div>`;
+          })()}
         </div>
         <div class="path">
           <span class="caps">Шлях злиття · знизу вгору</span>
@@ -682,11 +802,12 @@
     }
 
     document.addEventListener('click', e => {
-      const t = e.target.closest('[data-mode],[data-target],[data-step],[data-action]');
+      const t = e.target.closest('[data-mode],[data-target],[data-step],[data-action],[data-info]');
       if (!t) return;
       if (t.dataset.mode) {
         if (state.mode === t.dataset.mode) return;
         state.mode = t.dataset.mode;
+        ui.touched.clear();
         save();
         renderAll(false);
       } else if (t.dataset.target) {
@@ -694,20 +815,32 @@
         save();
         renderAll(true);
       } else if (t.dataset.step) {
+        ui.touched.add(t.dataset.step);
         setCount(t.dataset.step, getCount(t.dataset.step) + +t.dataset.d);
         renderInv(true);
         renderResult(true);
       } else if (t.dataset.action === 'reset') {
         state.inv[state.mode] = {};
         if (state.mode === 'gear') state.fod = { ef: 0, lf: 0, C: 0, F: 0, R: 0 };
+        ui.touched.clear();
         save();
         renderInv(true);
         renderResult(true);
+      } else if (t.dataset.action === 'all-levels') {
+        ui.allLevels = !ui.allLevels;
+        renderInv(false);
+      } else if (t.dataset.action === 'low') {
+        ui.low = !ui.low;
+        renderInv(false);
+      } else if (t.dataset.info) {
+        ui.info = ui.info === t.dataset.info ? null : t.dataset.info;
+        renderResult(false);
       }
     });
     // Typing into a counter updates only the result, so the field keeps focus
     document.addEventListener('input', e => {
       if (!e.target.dataset.key) return;
+      ui.touched.add(e.target.dataset.key);
       setCount(e.target.dataset.key, +e.target.value);
       renderResult(true);
     });
