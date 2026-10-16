@@ -10,6 +10,7 @@ import {
 import { FUSION_TIERS } from '../data/defaultGameData.js';
 import RuneIcon from './RuneIcon.jsx';
 import MultiTierInventory from './MultiTierInventory.jsx';
+import { resolveAssetUrl } from '../utils/assets.js';
 
 export default function RuneCard({
   rune,
@@ -95,7 +96,7 @@ export default function RuneCard({
           }}>
             {rune.image || (rune.iconKey === 'etched_echo_arrow' || rune.name.includes('Ехо') ? '/images/rune_echo_arrow.jpg' : rune.iconKey === 'etched_sword' || rune.name.includes('Меч') ? '/images/rune_sword.jpg' : rune.iconKey === 'etched_meteor' || rune.name.includes('Метеор') ? '/images/rune_meteor.jpg' : null) ? (
               <img
-                src={rune.image || (rune.iconKey === 'etched_sword' ? '/images/rune_sword.jpg' : rune.iconKey === 'etched_meteor' ? '/images/rune_meteor.jpg' : '/images/rune_echo_arrow.jpg')}
+                src={resolveAssetUrl(rune.image || (rune.iconKey === 'etched_sword' ? '/images/rune_sword.jpg' : rune.iconKey === 'etched_meteor' ? '/images/rune_meteor.jpg' : '/images/rune_echo_arrow.jpg'))}
                 alt={rune.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />

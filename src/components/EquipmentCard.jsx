@@ -8,6 +8,7 @@ import {
   formatNumber 
 } from '../engine/calculator.js';
 import MultiTierInventory from './MultiTierInventory.jsx';
+import { resolveAssetUrl } from '../utils/assets.js';
 
 export default function EquipmentCard({
   item,
@@ -105,7 +106,7 @@ export default function EquipmentCard({
           }}>
             {item.image || (item.name === 'Brightspear' ? '/images/weapon_spear.jpg' : item.name === 'Brave Bow' ? '/images/weapon_bow.jpg' : null) ? (
               <img
-                src={item.image || (item.name === 'Brightspear' ? '/images/weapon_spear.jpg' : '/images/weapon_bow.jpg')}
+                src={resolveAssetUrl(item.image || (item.name === 'Brightspear' ? '/images/weapon_spear.jpg' : '/images/weapon_bow.jpg'))}
                 alt={item.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
