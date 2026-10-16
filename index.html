@@ -2,245 +2,507 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Калькулятор злиття екіпірування (Merge Calculator)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Калькулятор мерджу Archero 2</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏹</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg: #0d1117;
-      --card-bg: #161b22;
-      --border: #30363d;
-      --text: #e6edf3;
-      --text-muted: #8b949e;
-      --c-gray: #8c97a4;
-      --c-green: #3fb950;
-      --c-blue: #388bfd;
-      --c-purple: #a371f7;
-      --c-gold: #f0883e;
-      --c-red: #f85149;
+      --bg-main: #0c1222;
+      --bg-card: #151d33;
+      --bg-card-sub: #1c2642;
+      --bg-input: #0a0f1d;
+      --border-main: #2b3859;
+      --border-accent: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      
+      /* Archero Rarity Colors */
+      --c-common: #94a3b8;
+      --c-great: #22c55e;
+      --c-rare: #3b82f6;
+      --c-epic: #a855f7;
+      --c-legendary: #f59e0b;
+      --c-mythic: #ef4444;
+      --c-chaos: #ec4899;
+      
+      --shadow-card: 0 6px 0 #070a14;
+      --shadow-btn: 0 4px 0 #070a14;
+      --shadow-btn-gold: 0 4px 0 #b45309;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
-      background: radial-gradient(circle at 50% 0%, #1a2233, #0d1117 70%);
-      color: var(--text);
+      background: radial-gradient(circle at 50% 0%, #172344 0%, var(--bg-main) 75%);
+      color: var(--text-main);
       font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 100vh;
-      padding: 24px 16px 60px;
+      padding: 16px 12px 60px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    .container {
+    .app-container {
       width: 100%;
-      max-width: 900px;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
+    /* Header */
     header {
       text-align: center;
-      margin-bottom: 28px;
+      padding: 8px 0 4px;
     }
 
     h1 {
-      font-family: 'Cinzel', serif;
-      font-size: 28px;
-      color: #ffd166;
-      text-shadow: 0 0 16px rgba(255, 209, 102, 0.35);
+      font-family: 'Lilita One', cursive;
+      font-size: 32px;
       letter-spacing: 1px;
-      margin-bottom: 8px;
+      color: #ffd166;
+      text-shadow: 0 3px 0 #b45309, 0 0 20px rgba(255, 209, 102, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     p.subtitle {
       color: var(--text-muted);
       font-size: 14px;
+      font-weight: 600;
+      margin-top: 4px;
     }
 
-    /* Grid selector */
+    /* Mode Navigation Tabs */
+    .tabs-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: rgba(10, 15, 29, 0.7);
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid var(--border-main);
+    }
+
+    .mode-tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Lilita One', cursive;
+      font-size: 18px;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      background: transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mode-tab.active {
+      color: #0c1222;
+      background: linear-gradient(180deg, #ffd166 0%, #f59e0b 100%);
+      box-shadow: 0 4px 0 #b45309, 0 0 15px rgba(245, 158, 11, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Section Card */
+    .section-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-main);
+      border-radius: 18px;
+      padding: 20px 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+
     .section-title {
-      font-size: 15px;
-      font-weight: 700;
+      font-family: 'Lilita One', cursive;
+      font-size: 20px;
+      letter-spacing: 0.5px;
       color: #ffd166;
-      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .tiers-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 10px;
-      margin-bottom: 24px;
+    .section-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .tier-btn {
-      background: var(--card-bg);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 8px;
+    .reset-btn {
+      background: #202b45;
+      border: 1px solid var(--border-main);
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
-      color: var(--text);
+      box-shadow: 0 2px 0 #0f1626;
+      transition: 0.15s;
+    }
+    .reset-btn:hover {
+      background: #2d3b5d;
+      color: #fff;
+    }
+    .reset-btn:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    /* 1. Target Selector Grid */
+    .tiers-scroll {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+      gap: 8px;
+    }
+
+    .tier-chip {
+      background: var(--bg-card-sub);
+      border: 2px solid var(--border-main);
+      border-radius: 14px;
+      padding: 10px 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 6px;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
       position: relative;
-      overflow: hidden;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 3px 0 #0f1626;
+      user-select: none;
     }
 
-    .tier-btn:hover {
+    .tier-chip:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 0 #0f1626;
     }
 
-    .tier-btn.active {
+    .tier-chip.active {
       border-color: #ffd166;
-      box-shadow: 0 0 20px rgba(255, 209, 102, 0.35);
-      background: linear-gradient(180deg, #21262d, #161b22);
+      background: linear-gradient(180deg, #2b395d, #1b253f);
+      box-shadow: 0 0 16px rgba(255, 209, 102, 0.4), 0 3px 0 #0f1626;
+      transform: translateY(-2px);
     }
 
-    .badge-icon {
+    .tier-icon-box {
       width: 44px;
       height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Lilita One', cursive;
+      font-size: 19px;
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 3px 6px rgba(0,0,0,0.4);
+      border: 2px solid rgba(255,255,255,0.25);
+    }
+
+    /* Hexagon shape for Runes */
+    .tier-icon-box.hexagon {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      border-radius: 0;
+      border: none;
+    }
+
+    .tier-chip-name {
+      font-family: 'Lilita One', cursive;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .tier-chip-sub {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* 2. Inventory (What You Already Have) */
+    .inventory-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .inv-row {
+      background: var(--bg-card-sub);
+      border: 1px solid var(--border-main);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 3px 0 #0f1626;
+      flex-wrap: wrap;
+    }
+
+    .inv-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 190px;
+    }
+
+    .inv-badge {
+      width: 38px;
+      height: 38px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-family: 'Lilita One', cursive;
+      font-size: 16px;
       font-weight: 800;
-      box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4);
-      position: relative;
+      box-shadow: inset 0 2px 3px rgba(255,255,255,0.25), 0 2px 5px rgba(0,0,0,0.3);
+      flex-shrink: 0;
     }
 
-    .tier-name {
-      font-size: 13px;
-      font-weight: 700;
+    .inv-badge.hexagon {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      border-radius: 0;
     }
 
-    .tier-sub {
-      font-size: 10px;
+    .inv-name-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .inv-name {
+      font-family: 'Lilita One', cursive;
+      font-size: 15px;
+      letter-spacing: 0.3px;
+    }
+
+    .inv-sub {
+      font-size: 11px;
       color: var(--text-muted);
-    }
-
-    /* Quantity input */
-    .controls-bar {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .qty-box {
+      font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
     }
 
-    .qty-btn {
+    .downgrade-tag {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #ffd166;
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 800;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-btn {
       width: 36px;
       height: 36px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #21262d;
-      color: var(--text);
+      background: #253352;
+      border: 1px solid var(--border-main);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Lilita One', cursive;
       font-size: 18px;
-      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: 0.15s;
+      box-shadow: 0 3px 0 #0d1424;
+      transition: 0.1s;
+      user-select: none;
     }
-    .qty-btn:hover { background: #30363d; }
 
-    .qty-input {
-      width: 60px;
+    .step-btn:hover {
+      background: #32446e;
+    }
+
+    .step-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #0d1424;
+    }
+
+    .step-input {
+      width: 58px;
       height: 36px;
-      background: #0d1117;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-main);
+      border-radius: 10px;
+      color: #ffd166;
+      font-family: 'Lilita One', cursive;
+      font-size: 18px;
       text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
-    /* Summary cards */
-    .stats-row {
+    .step-input:focus {
+      border-color: #ffd166;
+      box-shadow: 0 0 8px rgba(255, 209, 102, 0.3);
+    }
+
+    /* 3. Summary & Remaining Section */
+    .summary-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 14px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
+    .summary-card {
+      background: var(--bg-card-sub);
+      border: 2px solid var(--border-main);
+      border-radius: 16px;
       padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       position: relative;
+      box-shadow: var(--shadow-btn);
     }
 
-    .stat-label {
+    .summary-label {
       font-size: 12px;
+      font-weight: 800;
       color: var(--text-muted);
-      margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .stat-val {
-      font-size: 26px;
-      font-weight: 800;
+    .summary-value {
+      font-family: 'Lilita One', cursive;
+      font-size: 30px;
+      color: #ffd166;
+      line-height: 1.1;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.5);
     }
 
-    /* Step by step recipe tree */
-    .tree-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-      margin-bottom: 24px;
+    .summary-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
     }
 
-    .recipe-step {
+    /* Progress bar */
+    .progress-box {
+      background: var(--bg-card-sub);
+      border: 1px solid var(--border-main);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .progress-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 14px;
-      background: #0d1117;
-      border: 1px solid #21262d;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      gap: 12px;
-      flex-wrap: wrap;
+      margin-bottom: 8px;
     }
 
-    .recipe-target {
+    .progress-title {
+      font-family: 'Lilita One', cursive;
+      font-size: 15px;
+      color: #e2e8f0;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-pct {
+      font-family: 'Lilita One', cursive;
+      font-size: 18px;
+      color: #22c55e;
+      text-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 16px;
+      background: #090e1a;
+      border: 1px solid var(--border-main);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b 0%, #ffd166 100%);
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+    }
+
+    /* Synthesis Path Steps */
+    .path-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .path-card {
+      background: #0d1527;
+      border: 1px solid var(--border-main);
+      border-radius: 12px;
+      padding: 12px 14px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
       gap: 10px;
-      font-weight: 700;
+    }
+
+    .path-target {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Lilita One', cursive;
+      font-size: 15px;
       min-width: 170px;
     }
 
-    .recipe-arrow {
+    .path-arrow {
       color: #ffd166;
-      font-weight: 800;
+      font-family: 'Lilita One', cursive;
       font-size: 18px;
     }
 
-    .recipe-parts {
+    .path-reqs {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -251,372 +513,592 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 10px;
+      background: #17223c;
+      border: 1px solid var(--border-main);
+      padding: 4px 10px;
       border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      background: #1c2128;
-      border: 1px solid #30363d;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .pill .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    /* Breakdown table */
-    .table-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
+    .pill b {
+      font-family: 'Lilita One', cursive;
       font-size: 14px;
     }
 
-    th {
-      background: #21262d;
-      padding: 12px 16px;
+    /* Rarity badge backgrounds */
+    .bg-common { background: #64748b; color: #fff; }
+    .bg-great { background: #16a34a; color: #fff; }
+    .bg-rare { background: #2563eb; color: #fff; }
+    .bg-epic { background: #9333ea; color: #fff; }
+    .bg-legendary { background: #d97706; color: #fff; }
+    .bg-mythic { background: #dc2626; color: #fff; }
+
+    .color-common { color: var(--c-common); }
+    .color-great { color: var(--c-great); }
+    .color-rare { color: var(--c-rare); }
+    .color-epic { color: var(--c-epic); }
+    .color-legendary { color: var(--c-legendary); }
+    .color-mythic { color: var(--c-mythic); }
+
+    /* Footer */
+    footer {
+      text-align: center;
       font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
       color: var(--text-muted);
+      margin-top: 10px;
     }
 
-    td {
-      padding: 14px 16px;
-      border-top: 1px solid #21262d;
+    footer a {
+      color: #ffd166;
+      text-decoration: none;
+      font-weight: 700;
     }
 
-    tr:hover td {
-      background: rgba(255,255,255,0.02);
+    @media (max-width: 600px) {
+      h1 { font-size: 26px; }
+      .section-card { padding: 16px 12px; }
+      .tiers-scroll { grid-template-columns: repeat(4, 1fr); }
+      .summary-value { font-size: 26px; }
     }
-
-    /* Colors per tier */
-    .tier-0 { color: #8c97a4; border-color: #8c97a4; } /* Gray */
-    .tier-1 { color: #3fb950; border-color: #3fb950; } /* Green */
-    .tier-2 { color: #388bfd; border-color: #388bfd; } /* Blue */
-    .tier-3, .tier-4, .tier-5 { color: #bc8cff; border-color: #a371f7; } /* Purple */
-    .tier-6, .tier-7, .tier-8, .tier-9 { color: #f0883e; border-color: #f0883e; } /* Gold */
-    .tier-10 { color: #f85149; border-color: #f85149; } /* Red */
-
-    .bg-t0 { background: #484f58; color: #fff; }
-    .bg-t1 { background: #238636; color: #fff; }
-    .bg-t2 { background: #1f6feb; color: #fff; }
-    .bg-t3, .bg-t4, .bg-t5 { background: #8957e5; color: #fff; }
-    .bg-t6, .bg-t7, .bg-t8, .bg-t9 { background: #bd561d; color: #fff; }
-    .bg-t10 { background: #da3633; color: #fff; }
   </style>
 </head>
 <body>
-  <div class="container">
+
+  <div class="app-container">
+    <!-- Header -->
     <header>
-      <h1>Merge Calculator</h1>
-      <p class="subtitle">Калькулятор витрат і рецептів синтезу екіпірування за правилами гри</p>
+      <h1>🏹 Archero 2 Calculator</h1>
+      <p class="subtitle">Калькулятор мерджу спорядження S та рун</p>
     </header>
 
-    <div class="section-title">
-      <span>1. Оберіть цільовий рівень предмету:</span>
-    </div>
-    <div class="tiers-grid" id="tiersGrid"></div>
-
-    <div class="controls-bar">
-      <div class="qty-box">
-        <span style="font-weight: 600; font-size: 14px;">Кількість:</span>
-        <button class="qty-btn" onclick="changeQty(-1)">-</button>
-        <input type="number" id="qtyInput" class="qty-input" value="1" min="1" max="999" onchange="updateCalc()">
-        <button class="qty-btn" onclick="changeQty(1)">+</button>
-      </div>
-      <div id="quickInfo" style="font-size: 14px; color: var(--text-muted);"></div>
+    <!-- Mode Tabs: Gear S / Runes -->
+    <div class="tabs-wrapper">
+      <button class="mode-tab active" id="tabGear" onclick="setMode('gear')">
+        <span>⚔️</span> Спорядження S
+      </button>
+      <button class="mode-tab" id="tabRunes" onclick="setMode('runes')">
+        <span>🔮</span> Руни
+      </button>
     </div>
 
-    <div class="stats-row">
-      <div class="stat-card" style="border-left: 4px solid #8c97a4;">
-        <div class="stat-label">Базових Сірих предметів</div>
-        <div class="stat-val" id="statGray" style="color: #8c97a4;">0</div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Потрібно з 1-го рівня</div>
+    <!-- 1. Target Rarity Section -->
+    <section class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>1. Ціль</span>
+        </div>
+        <div class="section-actions">
+          <span id="targetBadgeDisplay" style="font-family:'Lilita One',cursive; font-size:16px; color:#ffd166;"></span>
+        </div>
       </div>
-      <div class="stat-card" style="border-left: 4px solid #bc8cff;">
-        <div class="stat-label">Фіолетових (Epic) еквівалент</div>
-        <div class="stat-val" id="statPurple" style="color: #bc8cff;">0</div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">1 Фіолетовий = 27 Сірих</div>
-      </div>
-      <div class="stat-card" style="border-left: 4px solid #f0883e;">
-        <div class="stat-label">Золотих (Legendary) еквівалент</div>
-        <div class="stat-val" id="statGold" style="color: #f0883e;">0</div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">1 Золотий = 216 Сірих</div>
-      </div>
-    </div>
+      <div class="tiers-scroll" id="targetGrid"></div>
+    </section>
 
-    <!-- Step by Step Chain -->
-    <div class="tree-card">
-      <div class="section-title">
-        <span>2. Покроковий ланцюжок синтезу (що потрібно для злиття):</span>
+    <!-- 2. Inventory (What You Already Have) -->
+    <section class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>2. Що вже маєш</span>
+        </div>
+        <div class="section-actions">
+          <button class="reset-btn" onclick="resetInventory()">Скинути все</button>
+        </div>
       </div>
-      <div id="recipeChain"></div>
-    </div>
+      <div class="inventory-list" id="inventoryList"></div>
+    </section>
 
-    <!-- Total items needed breakdown table -->
-    <div class="table-box">
-      <div style="padding: 16px 20px; font-weight: 700; color: #ffd166;">
-        3. Загальна кількість ресурсів за кожним рівнем (якщо збирати з нуля):
+    <!-- 3. What You Still Need & Progress -->
+    <section class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>3. Ще потрібно</span>
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Рівень / Тип</th>
-            <th>Специфічних (той самий лук)</th>
-            <th>Корму (будь-який того ж рівня)</th>
-            <th>Всього предметів цього рівня</th>
-          </tr>
-        </thead>
-        <tbody id="breakdownTable"></tbody>
-      </table>
-    </div>
+
+      <!-- Summary Cards Grid -->
+      <div class="summary-grid" id="summaryGrid"></div>
+
+      <!-- Progress Bar -->
+      <div class="progress-box">
+        <div class="progress-header">
+          <span class="progress-title">Прогрес до цілі</span>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="progressBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Step by Step Path -->
+      <div class="section-title" style="font-size: 16px; margin-bottom: 12px;">
+        <span>Покроковий шлях злиття:</span>
+      </div>
+      <div class="path-steps" id="pathSteps"></div>
+    </section>
+
+    <footer>
+      Archero 2 Clan Companion • <a href="https://github.com/isakawar/Archero-2" target="_blank">GitHub</a>
+    </footer>
   </div>
 
   <script>
-    // Definitions of tiers based on the uploaded chart
-    const TIERS = [
-      { id: 0, name: 'Сірий', sub: 'Common', colorClass: 'tier-0', bgClass: 'bg-t0', icon: '🏹', plus: '' },
-      { id: 1, name: 'Зелений', sub: 'Great', colorClass: 'tier-1', bgClass: 'bg-t1', icon: '🏹', plus: '' },
-      { id: 2, name: 'Синій', sub: 'Rare', colorClass: 'tier-2', bgClass: 'bg-t2', icon: '🏹', plus: '' },
-      { id: 3, name: 'Фіолетовий', sub: 'Epic', colorClass: 'tier-3', bgClass: 'bg-t3', icon: '🏹', plus: '' },
-      { id: 4, name: 'Фіолетовий +1', sub: 'Epic +1', colorClass: 'tier-4', bgClass: 'bg-t4', icon: '🏹', plus: '1' },
-      { id: 5, name: 'Фіолетовий +2', sub: 'Epic +2', colorClass: 'tier-5', bgClass: 'bg-t5', icon: '🏹', plus: '2' },
-      { id: 6, name: 'Золото', sub: 'Legendary', colorClass: 'tier-6', bgClass: 'bg-t6', icon: '🏹', plus: '' },
-      { id: 7, name: 'Золото +1', sub: 'Legendary +1', colorClass: 'tier-7', bgClass: 'bg-t7', icon: '🏹', plus: '1' },
-      { id: 8, name: 'Золото +2', sub: 'Legendary +2', colorClass: 'tier-8', bgClass: 'bg-t8', icon: '🏹', plus: '2' },
-      { id: 9, name: 'Золото +3', sub: 'Legendary +3', colorClass: 'tier-9', bgClass: 'bg-t9', icon: '🏹', plus: '3' },
-      { id: 10, name: 'Червоний', sub: 'Mythic', colorClass: 'tier-10', bgClass: 'bg-t10', icon: '🏹', plus: '' }
+    // --- GEAR S DEFINITIONS & RULES ---
+    // According to the official Archero 2 chart:
+    // Epic (E): 1 S copy
+    // Epic +1 (E1): E + 1 Epic Fodder (1 S, 1 Epic Fodder)
+    // Epic +2 (E2): E1 + 2 Epic Fodder (1 S, 3 Epic Fodder)
+    // Legendary (L): 2x E2 (2 S, 6 Epic Fodder)
+    // Legendary +1 (L1): L + 1 Leg Fodder
+    // Legendary +2 (L2): L1 + 1 Leg Fodder
+    // Legendary +3 (L3): L2 + 2 Leg Fodder (2 S, 6 Epic Fodder, 4 Leg Fodder) [equivalent to 38 base Epic Fodder]
+    // Mythic (M): 2x L3 (4 S, 12 Epic Fodder, 8 Leg Fodder) [76 Epic Fodder total]
+    // Mythic +1 (M1): M + 1x L3 (6 S, 18 Epic Fodder, 12 Leg Fodder) [114 Epic Fodder total]
+    // Mythic +2 (M2): M1 + 1x L3 (8 S, 24 Epic Fodder, 16 Leg Fodder) [152 Epic Fodder total]
+    // Mythic +3 (M3): M2 + 1x L3 (10 S, 30 Epic Fodder, 20 Leg Fodder) [190 Epic Fodder total]
+    // Mythic +4 (M4): M3 + 1x L3 (12 S, 36 Epic Fodder, 24 Leg Fodder) [228 Epic Fodder total]
+
+    const GEAR_TIERS = [
+      { id: 'epic', name: 'Епічний', sub: 'Epic', copies: 1, epicFodder: 0, legFodder: 0, colorClass: 'color-epic', bgClass: 'bg-epic', icon: 'E' },
+      { id: 'epic_1', name: 'Епічний +1', sub: 'Epic +1', copies: 1, epicFodder: 1, legFodder: 0, colorClass: 'color-epic', bgClass: 'bg-epic', icon: 'E+1', canDowngrade: true },
+      { id: 'epic_2', name: 'Епічний +2', sub: 'Epic +2', copies: 1, epicFodder: 3, legFodder: 0, colorClass: 'color-epic', bgClass: 'bg-epic', icon: 'E+2', canDowngrade: true },
+      { id: 'legendary', name: 'Легендарний', sub: 'Legendary', copies: 2, epicFodder: 6, legFodder: 0, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: 'L' },
+      { id: 'legendary_1', name: 'Легенд. +1', sub: 'Legendary +1', copies: 2, epicFodder: 6, legFodder: 1, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: 'L+1' },
+      { id: 'legendary_2', name: 'Легенд. +2', sub: 'Legendary +2', copies: 2, epicFodder: 6, legFodder: 2, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: 'L+2' },
+      { id: 'legendary_3', name: 'Легенд. +3', sub: 'Legendary +3', copies: 2, epicFodder: 6, legFodder: 4, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: 'L+3' },
+      { id: 'mythic', name: 'Міфічний', sub: 'Mythic', copies: 4, epicFodder: 12, legFodder: 8, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M' },
+      { id: 'mythic_1', name: 'Міфічний +1', sub: 'Mythic +1', copies: 6, epicFodder: 18, legFodder: 12, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M+1' },
+      { id: 'mythic_2', name: 'Міфічний +2', sub: 'Mythic +2', copies: 8, epicFodder: 24, legFodder: 16, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M+2' },
+      { id: 'mythic_3', name: 'Міфічний +3', sub: 'Mythic +3', copies: 10, epicFodder: 30, legFodder: 20, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M+3' },
+      { id: 'mythic_4', name: 'Міфічний +4', sub: 'Mythic +4', copies: 12, epicFodder: 36, legFodder: 24, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: 'M+4' }
     ];
 
-    // Synthesis direct recipe:
-    // How to get tier[i]: { inputs: [ { tier, count, isSpecific } ] }
-    // As seen on the image:
-    // Green (1): 3x Gray (0) [all 3 identical specific]
-    // Blue (2): 3x Green (1) [all 3 identical]
-    // Purple (3): 3x Blue (2) [all 3 identical]
-    // Purple +1 (4): 1x Purple (3) [main] + 1x Purple (3) [fodder]
-    // Purple +2 (5): 1x Purple+1 (4) [main] + 2x Purple (3) [fodder]
-    // Gold (6): 2x Purple+2 (5) [both specific]
-    // Gold +1 (7): 1x Gold (6) [main] + 1x Gold (6) [fodder]
-    // Gold +2 (8): 1x Gold+1 (7) [main] + 1x Gold (6) [fodder]
-    // Gold +3 (9): 1x Gold+2 (8) [main] + 2x Gold (6) [fodder]
-    // Red (10): 2x Gold+3 (9) [both specific]
+    // --- RUNES DEFINITIONS & RULES ---
+    // Common -> Great (3x) -> Rare (3x) -> Epic (3x = 27)
+    // Epic -> Epic+1 (2x = 54) -> Epic+2 (2x = 108) -> Legendary (2x = 216)
+    // Legendary+1 (2x = 432) -> Legendary+2 (2x = 864) -> Legendary+3 (2x = 1728) -> Mythic (2x = 3456)
+    const RUNE_TIERS = [
+      { id: 'common', name: 'Звичайний', sub: 'Common', grayMult: 1, colorClass: 'color-common', bgClass: 'bg-common', icon: '1' },
+      { id: 'great', name: 'Незвичайний', sub: 'Great', grayMult: 3, colorClass: 'color-great', bgClass: 'bg-great', icon: '2' },
+      { id: 'rare', name: 'Рідкісний', sub: 'Rare', grayMult: 9, colorClass: 'color-rare', bgClass: 'bg-rare', icon: '3' },
+      { id: 'epic', name: 'Епічний', sub: 'Epic', grayMult: 27, colorClass: 'color-epic', bgClass: 'bg-epic', icon: '4' },
+      { id: 'epic_1', name: 'Епічний +1', sub: 'Epic +1', grayMult: 54, colorClass: 'color-epic', bgClass: 'bg-epic', icon: '5' },
+      { id: 'epic_2', name: 'Епічний +2', sub: 'Epic +2', grayMult: 108, colorClass: 'color-epic', bgClass: 'bg-epic', icon: '6' },
+      { id: 'legendary', name: 'Легендарний', sub: 'Legendary', grayMult: 216, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: '7' },
+      { id: 'legendary_1', name: 'Легенд. +1', sub: 'Legendary +1', grayMult: 432, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: '8' },
+      { id: 'legendary_2', name: 'Легенд. +2', sub: 'Legendary +2', grayMult: 864, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: '9' },
+      { id: 'legendary_3', name: 'Легенд. +3', sub: 'Legendary +3', grayMult: 1728, colorClass: 'color-legendary', bgClass: 'bg-legendary', icon: '10' },
+      { id: 'mythic', name: 'Міфічний', sub: 'Mythic', grayMult: 3456, colorClass: 'color-mythic', bgClass: 'bg-mythic', icon: '11' }
+    ];
 
-    const RECIPES = {
-      1: [{ tier: 0, count: 3, specific: true }],
-      2: [{ tier: 1, count: 3, specific: true }],
-      3: [{ tier: 2, count: 3, specific: true }],
-      4: [{ tier: 3, count: 1, specific: true }, { tier: 3, count: 1, specific: false }],
-      5: [{ tier: 4, count: 1, specific: true }, { tier: 3, count: 2, specific: false }],
-      6: [{ tier: 5, count: 2, specific: true }],
-      7: [{ tier: 6, count: 1, specific: true }, { tier: 6, count: 1, specific: false }],
-      8: [{ tier: 7, count: 1, specific: true }, { tier: 6, count: 1, specific: false }],
-      9: [{ tier: 8, count: 1, specific: true }, { tier: 6, count: 2, specific: false }],
-      10: [{ tier: 9, count: 2, specific: true }]
+    // --- APP STATE ---
+    let currentMode = 'gear'; // 'gear' or 'runes'
+    let selectedGearTarget = 'mythic_1'; // Default as in mockup
+    let selectedRuneTarget = 'mythic';
+
+    // Gear inventory: initial example from mockup has 1x Legendary +3
+    let gearInventory = {
+      legendary_3: 1,
+      epic_fodder: 0,
+      legendary_fodder: 0
     };
 
-    let selectedTier = 9; // Default Gold +3
+    // Rune inventory
+    let runeInventory = {
+      legendary: 1
+    };
 
-    function initTiersGrid() {
-      const grid = document.getElementById('tiersGrid');
-      grid.innerHTML = '';
-      TIERS.forEach(t => {
+    // Load saved state from localStorage if available
+    try {
+      const savedMode = localStorage.getItem('archero2_calc_mode');
+      if (savedMode) currentMode = savedMode;
+      const savedGearTarget = localStorage.getItem('archero2_gear_target');
+      if (savedGearTarget) selectedGearTarget = savedGearTarget;
+      const savedGearInv = localStorage.getItem('archero2_gear_inv');
+      if (savedGearInv) gearInventory = JSON.parse(savedGearInv);
+      const savedRuneTarget = localStorage.getItem('archero2_rune_target');
+      if (savedRuneTarget) selectedRuneTarget = savedRuneTarget;
+      const savedRuneInv = localStorage.getItem('archero2_rune_inv');
+      if (savedRuneInv) runeInventory = JSON.parse(savedRuneInv);
+    } catch(e) {}
+
+    function saveState() {
+      try {
+        localStorage.setItem('archero2_calc_mode', currentMode);
+        localStorage.setItem('archero2_gear_target', selectedGearTarget);
+        localStorage.setItem('archero2_gear_inv', JSON.stringify(gearInventory));
+        localStorage.setItem('archero2_rune_target', selectedRuneTarget);
+        localStorage.setItem('archero2_rune_inv', JSON.stringify(runeInventory));
+      } catch(e) {}
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('tabGear').classList.toggle('active', mode === 'gear');
+      document.getElementById('tabRunes').classList.toggle('active', mode === 'runes');
+      saveState();
+      renderAll();
+    }
+
+    function resetInventory() {
+      if (currentMode === 'gear') {
+        gearInventory = {};
+      } else {
+        runeInventory = {};
+      }
+      saveState();
+      renderAll();
+    }
+
+    function changeQty(key, delta) {
+      const inv = currentMode === 'gear' ? gearInventory : runeInventory;
+      const current = Math.max(0, parseInt(inv[key] || 0, 10));
+      const updated = Math.max(0, current + delta);
+      if (updated === 0) {
+        delete inv[key];
+      } else {
+        inv[key] = updated;
+      }
+      saveState();
+      renderAll();
+    }
+
+    function setDirectQty(key, val) {
+      const inv = currentMode === 'gear' ? gearInventory : runeInventory;
+      const parsed = Math.max(0, parseInt(val, 10) || 0);
+      if (parsed === 0) {
+        delete inv[key];
+      } else {
+        inv[key] = parsed;
+      }
+      saveState();
+      renderAll();
+    }
+
+    // --- RENDER 1: TARGET SELECTOR ---
+    function renderTargetSelector() {
+      const container = document.getElementById('targetGrid');
+      container.innerHTML = '';
+      const tiers = currentMode === 'gear' ? GEAR_TIERS : RUNE_TIERS;
+      const currentSelected = currentMode === 'gear' ? selectedGearTarget : selectedRuneTarget;
+      const isRune = currentMode === 'runes';
+
+      const targetObj = tiers.find(t => t.id === currentSelected) || tiers[tiers.length - 1];
+      document.getElementById('targetBadgeDisplay').innerText = `Ціль: ${targetObj.name}`;
+
+      tiers.forEach(t => {
         const btn = document.createElement('div');
-        btn.className = `tier-btn ${t.id === selectedTier ? 'active' : ''}`;
+        btn.className = `tier-chip ${t.id === currentSelected ? 'active' : ''}`;
         btn.onclick = () => {
-          selectedTier = t.id;
-          document.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          updateCalc();
+          if (currentMode === 'gear') selectedGearTarget = t.id;
+          else selectedRuneTarget = t.id;
+          saveState();
+          renderAll();
         };
 
         btn.innerHTML = `
-          <div class="badge-icon ${t.bgClass}">
+          <div class="tier-icon-box ${t.bgClass} ${isRune ? 'hexagon' : ''}">
             ${t.icon}
-            ${t.plus ? `<span style="position:absolute; bottom:2px; right:4px; font-size:11px; background:rgba(0,0,0,0.6); padding:0 3px; border-radius:4px;">+${t.plus}</span>` : ''}
           </div>
-          <div class="tier-name ${t.colorClass}">${t.name}</div>
-          <div class="tier-sub">${t.sub}</div>
+          <div class="tier-chip-name ${t.colorClass}">${t.name}</div>
+          <div class="tier-chip-sub">${t.sub}</div>
         `;
-        grid.appendChild(btn);
+        container.appendChild(btn);
       });
     }
 
-    function changeQty(delta) {
-      const input = document.getElementById('qtyInput');
-      let val = Math.max(1, (parseInt(input.value) || 1) + delta);
-      input.value = val;
-      updateCalc();
-    }
+    // --- RENDER 2: INVENTORY SECTION ---
+    function renderInventory() {
+      const container = document.getElementById('inventoryList');
+      container.innerHTML = '';
 
-    // Calculate total base Gray value per single item of tier
-    const GRAY_MULT = {
-      0: 1,
-      1: 3,
-      2: 9,
-      3: 27,
-      4: 54,
-      5: 108,
-      6: 216,
-      7: 432,
-      8: 648,
-      9: 1080,
-      10: 2160
-    };
+      if (currentMode === 'gear') {
+        const targetIndex = GEAR_TIERS.findIndex(t => t.id === selectedGearTarget);
+        // Available tiers to have are all tiers below the target
+        const availableTiers = GEAR_TIERS.slice(0, targetIndex).reverse();
 
-    // Calculate detailed breakdown of specific vs fodder needed for 1 of targetTier
-    function computeDetailedBreakdown(targetTier, qty) {
-      // We can track counts for each tier: { specific: count, fodder: count }
-      const breakdown = {};
-      for (let i = 0; i <= targetTier; i++) {
-        breakdown[i] = { specific: 0, fodder: 0 };
-      }
+        // 1. Specific S-Gear tiers
+        availableTiers.forEach(t => {
+          const count = gearInventory[t.id] || 0;
+          const row = document.createElement('div');
+          row.className = 'inv-row';
 
-      function expand(tier, count, isSpecific) {
-        if (isSpecific) breakdown[tier].specific += count;
-        else breakdown[tier].fodder += count;
-
-        if (tier === 0) return;
-
-        const recipe = RECIPES[tier];
-        if (recipe) {
-          recipe.forEach(ing => {
-            // If parent was fodder, all children are technically fodder.
-            // If parent was specific, specific ingredients remain specific, fodder remain fodder.
-            const childSpecific = isSpecific ? ing.specific : false;
-            expand(ing.tier, ing.count * count, childSpecific);
-          });
-        }
-      }
-
-      expand(targetTier, qty, true);
-      return breakdown;
-    }
-
-    // Build immediate prerequisite recipe chain
-    function buildRecipeChain(targetTier, qty) {
-      const steps = [];
-      // Traverse down from targetTier to 1
-      // We calculate how many of each tier need to be crafted
-      const craftedCount = {};
-      craftedCount[targetTier] = qty;
-
-      for (let t = targetTier; t >= 1; t--) {
-        const countToCraft = craftedCount[t] || 0;
-        if (countToCraft > 0) {
-          const recipe = RECIPES[t];
-          steps.push({
-            resultTier: t,
-            count: countToCraft,
-            ingredients: recipe.map(ing => ({
-              tier: ing.tier,
-              count: ing.count * countToCraft,
-              perOne: ing.count,
-              specific: ing.specific
-            }))
-          });
-
-          // Propagate to ingredients
-          recipe.forEach(ing => {
-            craftedCount[ing.tier] = (craftedCount[ing.tier] || 0) + (ing.count * countToCraft);
-          });
-        }
-      }
-      return steps;
-    }
-
-    function updateCalc() {
-      const qty = Math.max(1, parseInt(document.getElementById('qtyInput').value) || 1);
-      const target = TIERS[selectedTier];
-
-      document.getElementById('quickInfo').innerHTML = 
-        `Ціль: <b class="${target.colorClass}">${qty}x ${target.name}</b>`;
-
-      const totalGray = GRAY_MULT[selectedTier] * qty;
-      const totalPurple = (totalGray / 27).toFixed(1).replace('.0', '');
-      const totalGold = (totalGray / 216).toFixed(2).replace('.00', '');
-
-      document.getElementById('statGray').innerText = totalGray.toLocaleString();
-      document.getElementById('statPurple').innerText = totalPurple;
-      document.getElementById('statGold').innerText = totalGold;
-
-      // 1. Build recipe chain
-      const chainContainer = document.getElementById('recipeChain');
-      chainContainer.innerHTML = '';
-
-      if (selectedTier === 0) {
-        chainContainer.innerHTML = '<div style="color:var(--text-muted); font-size:14px; text-align:center; padding:16px;">Сірий предмет є базовим і не потребує злиття.</div>';
-      } else {
-        const steps = buildRecipeChain(selectedTier, qty);
-        steps.forEach(step => {
-          const resTier = TIERS[step.resultTier];
-          const div = document.createElement('div');
-          div.className = 'recipe-step';
-
-          let partsHtml = step.ingredients.map(ing => {
-            const iTier = TIERS[ing.tier];
-            const badgeType = ing.specific 
-              ? `<span style="color:#ffd166; font-size:11px;">(той самий)</span>` 
-              : `<span style="color:var(--text-muted); font-size:11px;">(будь-який корм)</span>`;
-            return `
-              <span class="pill">
-                <span class="dot ${iTier.bgClass}"></span>
-                <b class="${iTier.colorClass}">${ing.count}x</b> ${iTier.name} ${badgeType}
-              </span>
-            `;
-          }).join('<span style="color:var(--text-muted); font-weight:700;">+</span>');
-
-          div.innerHTML = `
-            <div class="recipe-target">
-              <span class="pill ${resTier.bgClass}" style="color:#fff;">${step.count}x</span>
-              <span class="${resTier.colorClass}">${resTier.name}</span>
+          row.innerHTML = `
+            <div class="inv-info">
+              <div class="inv-badge ${t.bgClass}">${t.icon}</div>
+              <div class="inv-name-box">
+                <div class="inv-name ${t.colorClass}">${t.name}</div>
+                <div class="inv-sub">
+                  ${t.sub}
+                  ${t.canDowngrade ? '<span class="downgrade-tag">можна понизити</span>' : ''}
+                </div>
+              </div>
             </div>
-            <div class="recipe-arrow">←</div>
-            <div class="recipe-parts">${partsHtml}</div>
+            <div class="stepper">
+              <button class="step-btn" onclick="changeQty('${t.id}', -1)">−</button>
+              <input type="number" class="step-input" value="${count}" min="0" onchange="setDirectQty('${t.id}', this.value)" />
+              <button class="step-btn" onclick="changeQty('${t.id}', 1)">+</button>
+            </div>
           `;
-          chainContainer.appendChild(div);
+          container.appendChild(row);
+        });
+
+        // 2. Legendary Fodder row (if target is Legendary+1 or higher)
+        if (targetIndex >= 4) {
+          const legFodderCount = gearInventory['legendary_fodder'] || 0;
+          const rowLeg = document.createElement('div');
+          rowLeg.className = 'inv-row';
+          rowLeg.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+          rowLeg.innerHTML = `
+            <div class="inv-info">
+              <div class="inv-badge bg-legendary">LF</div>
+              <div class="inv-name-box">
+                <div class="inv-name color-legendary">Легендарний фураж</div>
+                <div class="inv-sub">Будь-який леґендарний корм (= 8 епіків)</div>
+              </div>
+            </div>
+            <div class="stepper">
+              <button class="step-btn" onclick="changeQty('legendary_fodder', -1)">−</button>
+              <input type="number" class="step-input" value="${legFodderCount}" min="0" onchange="setDirectQty('legendary_fodder', this.value)" />
+              <button class="step-btn" onclick="changeQty('legendary_fodder', 1)">+</button>
+            </div>
+          `;
+          container.appendChild(rowLeg);
+        }
+
+        // 3. Epic Fodder row
+        const epicFodderCount = gearInventory['epic_fodder'] || 0;
+        const rowEpic = document.createElement('div');
+        rowEpic.className = 'inv-row';
+        rowEpic.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+        rowEpic.innerHTML = `
+          <div class="inv-info">
+            <div class="inv-badge bg-epic">EF</div>
+            <div class="inv-name-box">
+              <div class="inv-name color-epic">Епічний фураж</div>
+              <div class="inv-sub">Будь-яке епічне спорядження на корм</div>
+            </div>
+          </div>
+          <div class="stepper">
+            <button class="step-btn" onclick="changeQty('epic_fodder', -1)">−</button>
+            <input type="number" class="step-input" value="${epicFodderCount}" min="0" onchange="setDirectQty('epic_fodder', this.value)" />
+            <button class="step-btn" onclick="changeQty('epic_fodder', 1)">+</button>
+          </div>
+        `;
+        container.appendChild(rowEpic);
+
+      } else {
+        // Runes Inventory
+        const targetIndex = RUNE_TIERS.findIndex(t => t.id === selectedRuneTarget);
+        const availableTiers = RUNE_TIERS.slice(0, targetIndex).reverse();
+
+        availableTiers.forEach(t => {
+          const count = runeInventory[t.id] || 0;
+          const row = document.createElement('div');
+          row.className = 'inv-row';
+
+          row.innerHTML = `
+            <div class="inv-info">
+              <div class="inv-badge hexagon ${t.bgClass}">${t.icon}</div>
+              <div class="inv-name-box">
+                <div class="inv-name ${t.colorClass}">${t.name}</div>
+                <div class="inv-sub">${t.sub} (Рівень ${t.icon})</div>
+              </div>
+            </div>
+            <div class="stepper">
+              <button class="step-btn" onclick="changeQty('${t.id}', -1)">−</button>
+              <input type="number" class="step-input" value="${count}" min="0" onchange="setDirectQty('${t.id}', this.value)" />
+              <button class="step-btn" onclick="changeQty('${t.id}', 1)">+</button>
+            </div>
+          `;
+          container.appendChild(row);
         });
       }
+    }
 
-      // 2. Build breakdown table
-      const detailed = computeDetailedBreakdown(selectedTier, qty);
-      const tbody = document.getElementById('breakdownTable');
-      tbody.innerHTML = '';
+    // --- RENDER 3: WHAT YOU STILL NEED & PATH ---
+    function renderSummaryAndPath() {
+      const summaryGrid = document.getElementById('summaryGrid');
+      const pathSteps = document.getElementById('pathSteps');
+      summaryGrid.innerHTML = '';
+      pathSteps.innerHTML = '';
 
-      // Render from selectedTier down to 0
-      for (let t = selectedTier; t >= 0; t--) {
-        const item = TIERS[t];
-        const data = detailed[t];
-        const total = data.specific + data.fodder;
+      if (currentMode === 'gear') {
+        const target = GEAR_TIERS.find(t => t.id === selectedGearTarget);
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>
-            <span class="pill">
-              <span class="dot ${item.bgClass}"></span>
-              <b class="${item.colorClass}">${item.name}</b>
-              <span style="font-size:11px; color:var(--text-muted);">(${item.sub})</span>
-            </span>
-          </td>
-          <td style="color:#ffd166; font-weight:700;">${data.specific ? data.specific + ' шт.' : '-'}</td>
-          <td style="color:var(--text-muted);">${data.fodder ? data.fodder + ' шт.' : '-'}</td>
-          <td style="font-weight:800; font-size:15px;" class="${item.colorClass}">${total} шт.</td>
+        // Calculate total provided by inventory
+        let ownedCopies = 0;
+        let ownedEpicFodder = Number(gearInventory['epic_fodder'] || 0);
+        let ownedLegFodder = Number(gearInventory['legendary_fodder'] || 0);
+
+        GEAR_TIERS.forEach(t => {
+          const cnt = Number(gearInventory[t.id] || 0);
+          if (cnt > 0) {
+            ownedCopies += t.copies * cnt;
+            ownedEpicFodder += t.epicFodder * cnt;
+            ownedLegFodder += t.legFodder * cnt;
+          }
+        });
+
+        // Total target requirements
+        const reqCopies = target.copies;
+        const reqEpic = target.epicFodder;
+        const reqLeg = target.legFodder;
+
+        // Still needed
+        const remCopies = Math.max(0, reqCopies - ownedCopies);
+        const remEpic = Math.max(0, reqEpic - ownedEpicFodder);
+        const remLeg = Math.max(0, reqLeg - ownedLegFodder);
+
+        // Progress calculation based on total Epic equivalent points
+        // 1 S copy = ~38 Epic equiv, 1 Leg Fodder = 8 Epic, 1 Epic Fodder = 1 Epic
+        const totalPointsTarget = (reqCopies * 38) + (reqLeg * 8) + reqEpic;
+        const totalPointsOwned = (ownedCopies * 38) + (ownedLeg * 8) + ownedEpicFodder;
+        const pct = totalPointsTarget > 0 ? Math.min(100, Math.round((totalPointsOwned / totalPointsTarget) * 100)) : 100;
+
+        document.getElementById('progressPct').innerText = `${pct}%`;
+        document.getElementById('progressBar').style.width = `${pct}%`;
+
+        // 3 Summary Cards
+        summaryGrid.innerHTML = `
+          <div class="summary-card">
+            <div class="summary-label">
+              <span>🟡</span> Копії S-предмета
+            </div>
+            <div class="summary-value" style="color: #ffd166;">${remCopies} шт.</div>
+            <div class="summary-hint">Потрібно: ${reqCopies} | Є в наявності: ${ownedCopies}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">
+              <span>🟣</span> Епічний фураж
+            </div>
+            <div class="summary-value" style="color: var(--c-epic);">${remEpic} шт.</div>
+            <div class="summary-hint">Потрібно: ${reqEpic} | Є в наявності: ${ownedEpicFodder}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">
+              <span>🟠</span> Легендарний фураж
+            </div>
+            <div class="summary-value" style="color: var(--c-legendary);">${remLeg} шт.</div>
+            <div class="summary-hint">Потрібно: ${reqLeg} | Є в наявності: ${ownedLegFodder}</div>
+          </div>
         `;
-        tbody.appendChild(tr);
+
+        // Synthesis Path
+        const targetIndex = GEAR_TIERS.findIndex(t => t.id === selectedGearTarget);
+        const steps = [
+          { target: 'E+1', formula: '1× Епічний (той самий) + 1× Епічний фураж' },
+          { target: 'E+2', formula: '1× Епічний +1 + 2× Епічний фураж' },
+          { target: 'L (Легендарний)', formula: '2× Епічний +2 (обидва той самий S-предмет)' },
+          { target: 'L+1', formula: '1× Легендарний + 1× Легендарний фураж' },
+          { target: 'L+2', formula: '1× Легендарний +1 + 1× Легендарний фураж' },
+          { target: 'L+3', formula: '1× Легендарний +2 + 2× Легендарний фураж' },
+          { target: 'M (Міфічний)', formula: '2× Легендарний +3 (обидва той самий S-предмет)' },
+          { target: 'M+1', formula: '1× Міфічний + 1× Легендарний +3 (той самий)' },
+          { target: 'M+2', formula: '1× Міфічний +1 + 1× Легендарний +3 (той самий)' },
+          { target: 'M+3', formula: '1× Міфічний +2 + 1× Легендарний +3 (той самий)' },
+          { target: 'M+4', formula: '1× Міфічний +3 + 1× Легендарний +3 (той самий)' }
+        ];
+
+        steps.slice(0, targetIndex).forEach((step, idx) => {
+          const card = document.createElement('div');
+          card.className = 'path-card';
+          card.innerHTML = `
+            <div class="path-target">
+              <span class="pill bg-legendary">Крок ${idx + 1}</span>
+              <span>→ ${step.target}</span>
+            </div>
+            <div class="path-reqs">
+              <span style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${step.formula}</span>
+            </div>
+          `;
+          pathSteps.appendChild(card);
+        });
+
+      } else {
+        // Runes summary & path
+        const target = RUNE_TIERS.find(t => t.id === selectedRuneTarget);
+        let ownedGray = 0;
+
+        RUNE_TIERS.forEach(t => {
+          const cnt = Number(runeInventory[t.id] || 0);
+          if (cnt > 0) {
+            ownedGray += t.grayMult * cnt;
+          }
+        });
+
+        const reqGray = target.grayMult;
+        const remGray = Math.max(0, reqGray - ownedGray);
+        const remRare = (remGray / 9).toFixed(1).replace('.0', '');
+        const remEpic = (remGray / 27).toFixed(1).replace('.0', '');
+
+        const pct = reqGray > 0 ? Math.min(100, Math.round((ownedGray / reqGray) * 100)) : 100;
+
+        document.getElementById('progressPct').innerText = `${pct}%`;
+        document.getElementById('progressBar').style.width = `${pct}%`;
+
+        summaryGrid.innerHTML = `
+          <div class="summary-card">
+            <div class="summary-label">
+              <span>⚪</span> Залишилось звичайних рун
+            </div>
+            <div class="summary-value" style="color: #ffd166;">${remGray.toLocaleString()} шт.</div>
+            <div class="summary-hint">Всього еквівалент цілі: ${reqGray.toLocaleString()}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">
+              <span>🔵</span> Рідкісний еквівалент (Rare)
+            </div>
+            <div class="summary-value" style="color: var(--c-rare);">${remRare} шт.</div>
+            <div class="summary-hint">1 Рідкісна = 9 Звичайних</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">
+              <span>🟣</span> Епічний еквівалент (Epic)
+            </div>
+            <div class="summary-value" style="color: var(--c-epic);">${remEpic} шт.</div>
+            <div class="summary-hint">1 Епічна = 27 Звичайних</div>
+          </div>
+        `;
+
+        const targetIndex = RUNE_TIERS.findIndex(t => t.id === selectedRuneTarget);
+        const runeSteps = [
+          'Зелена (Great) ← 3× Звичайна (той самий вид)',
+          'Синя (Rare) ← 3× Зелена (той самий вид)',
+          'Епічна (Epic) ← 3× Синя (той самий вид)',
+          'Епічна +1 ← 2× Епічна (той самий вид)',
+          'Епічна +2 ← 2× Епічна +1 (той самий вид)',
+          'Легендарна ← 2× Епічна +2 (той самий вид)',
+          'Легендарна +1 ← 2× Легендарна (той самий вид)',
+          'Легендарна +2 ← 2× Легендарна +1 (той самий вид)',
+          'Легендарна +3 ← 2× Легендарна +2 (той самий вид)',
+          'Міфічна ← 2× Легендарна +3 (той самий вид)'
+        ];
+
+        runeSteps.slice(0, targetIndex).forEach((step, idx) => {
+          const card = document.createElement('div');
+          card.className = 'path-card';
+          card.innerHTML = `
+            <div class="path-target">
+              <span class="pill bg-great">Рівень ${idx + 2}</span>
+            </div>
+            <div class="path-reqs">
+              <span style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${step}</span>
+            </div>
+          `;
+          pathSteps.appendChild(card);
+        });
       }
     }
 
-    initTiersGrid();
-    updateCalc();
+    function renderAll() {
+      renderTargetSelector();
+      renderInventory();
+      renderSummaryAndPath();
+    }
+
+    // Initialize on page load
+    renderAll();
   </script>
 </body>
 </html>
