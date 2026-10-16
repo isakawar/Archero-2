@@ -1,13 +1,622 @@
 <!DOCTYPE html>
-<html lang="uk" data-theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏹</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Archero 2 Upgrade Calculator</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Калькулятор злиття екіпірування (Merge Calculator)</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏹</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --c-gray: #8c97a4;
+      --c-green: #3fb950;
+      --c-blue: #388bfd;
+      --c-purple: #a371f7;
+      --c-gold: #f0883e;
+      --c-red: #f85149;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #1a2233, #0d1117 70%);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 28px;
+      color: #ffd166;
+      text-shadow: 0 0 16px rgba(255, 209, 102, 0.35);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Grid selector */
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffd166;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tiers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .tier-btn {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 8px;
+      cursor: pointer;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tier-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+
+    .tier-btn.active {
+      border-color: #ffd166;
+      box-shadow: 0 0 20px rgba(255, 209, 102, 0.35);
+      background: linear-gradient(180deg, #21262d, #161b22);
+    }
+
+    .badge-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    .tier-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .tier-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Quantity input */
+    .controls-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .qty-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qty-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #21262d;
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.15s;
+    }
+    .qty-btn:hover { background: #30363d; }
+
+    .qty-input {
+      width: 60px;
+      height: 36px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Summary cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-val {
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    /* Step by step recipe tree */
+    .tree-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .recipe-step {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .recipe-target {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      min-width: 170px;
+    }
+
+    .recipe-arrow {
+      color: #ffd166;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .recipe-parts {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #1c2128;
+      border: 1px solid #30363d;
+    }
+
+    .pill .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* Breakdown table */
+    .table-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #21262d;
+      padding: 12px 16px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-top: 1px solid #21262d;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* Colors per tier */
+    .tier-0 { color: #8c97a4; border-color: #8c97a4; } /* Gray */
+    .tier-1 { color: #3fb950; border-color: #3fb950; } /* Green */
+    .tier-2 { color: #388bfd; border-color: #388bfd; } /* Blue */
+    .tier-3, .tier-4, .tier-5 { color: #bc8cff; border-color: #a371f7; } /* Purple */
+    .tier-6, .tier-7, .tier-8, .tier-9 { color: #f0883e; border-color: #f0883e; } /* Gold */
+    .tier-10 { color: #f85149; border-color: #f85149; } /* Red */
+
+    .bg-t0 { background: #484f58; color: #fff; }
+    .bg-t1 { background: #238636; color: #fff; }
+    .bg-t2 { background: #1f6feb; color: #fff; }
+    .bg-t3, .bg-t4, .bg-t5 { background: #8957e5; color: #fff; }
+    .bg-t6, .bg-t7, .bg-t8, .bg-t9 { background: #bd561d; color: #fff; }
+    .bg-t10 { background: #da3633; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Merge Calculator</h1>
+      <p class="subtitle">Калькулятор витрат і рецептів синтезу екіпірування за правилами гри</p>
+    </header>
+
+    <div class="section-title">
+      <span>1. Оберіть цільовий рівень предмету:</span>
+    </div>
+    <div class="tiers-grid" id="tiersGrid"></div>
+
+    <div class="controls-bar">
+      <div class="qty-box">
+        <span style="font-weight: 600; font-size: 14px;">Кількість:</span>
+        <button class="qty-btn" onclick="changeQty(-1)">-</button>
+        <input type="number" id="qtyInput" class="qty-input" value="1" min="1" max="999" onchange="updateCalc()">
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+      <div id="quickInfo" style="font-size: 14px; color: var(--text-muted);"></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card" style="border-left: 4px solid #8c97a4;">
+        <div class="stat-label">Базових Сірих предметів</div>
+        <div class="stat-val" id="statGray" style="color: #8c97a4;">0</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Потрібно з 1-го рівня</div>
+      </div>
+      <div class="stat-card" style="border-left: 4px solid #bc8cff;">
+        <div class="stat-label">Фіолетових (Epic) еквівалент</div>
+        <div class="stat-val" id="statPurple" style="color: #bc8cff;">0</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">1 Фіолетовий = 27 Сірих</div>
+      </div>
+      <div class="stat-card" style="border-left: 4px solid #f0883e;">
+        <div class="stat-label">Золотих (Legendary) еквівалент</div>
+        <div class="stat-val" id="statGold" style="color: #f0883e;">0</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">1 Золотий = 216 Сірих</div>
+      </div>
+    </div>
+
+    <!-- Step by Step Chain -->
+    <div class="tree-card">
+      <div class="section-title">
+        <span>2. Покроковий ланцюжок синтезу (що потрібно для злиття):</span>
+      </div>
+      <div id="recipeChain"></div>
+    </div>
+
+    <!-- Total items needed breakdown table -->
+    <div class="table-box">
+      <div style="padding: 16px 20px; font-weight: 700; color: #ffd166;">
+        3. Загальна кількість ресурсів за кожним рівнем (якщо збирати з нуля):
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Рівень / Тип</th>
+            <th>Специфічних (той самий лук)</th>
+            <th>Корму (будь-який того ж рівня)</th>
+            <th>Всього предметів цього рівня</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Definitions of tiers based on the uploaded chart
+    const TIERS = [
+      { id: 0, name: 'Сірий', sub: 'Common', colorClass: 'tier-0', bgClass: 'bg-t0', icon: '🏹', plus: '' },
+      { id: 1, name: 'Зелений', sub: 'Great', colorClass: 'tier-1', bgClass: 'bg-t1', icon: '🏹', plus: '' },
+      { id: 2, name: 'Синій', sub: 'Rare', colorClass: 'tier-2', bgClass: 'bg-t2', icon: '🏹', plus: '' },
+      { id: 3, name: 'Фіолетовий', sub: 'Epic', colorClass: 'tier-3', bgClass: 'bg-t3', icon: '🏹', plus: '' },
+      { id: 4, name: 'Фіолетовий +1', sub: 'Epic +1', colorClass: 'tier-4', bgClass: 'bg-t4', icon: '🏹', plus: '1' },
+      { id: 5, name: 'Фіолетовий +2', sub: 'Epic +2', colorClass: 'tier-5', bgClass: 'bg-t5', icon: '🏹', plus: '2' },
+      { id: 6, name: 'Золото', sub: 'Legendary', colorClass: 'tier-6', bgClass: 'bg-t6', icon: '🏹', plus: '' },
+      { id: 7, name: 'Золото +1', sub: 'Legendary +1', colorClass: 'tier-7', bgClass: 'bg-t7', icon: '🏹', plus: '1' },
+      { id: 8, name: 'Золото +2', sub: 'Legendary +2', colorClass: 'tier-8', bgClass: 'bg-t8', icon: '🏹', plus: '2' },
+      { id: 9, name: 'Золото +3', sub: 'Legendary +3', colorClass: 'tier-9', bgClass: 'bg-t9', icon: '🏹', plus: '3' },
+      { id: 10, name: 'Червоний', sub: 'Mythic', colorClass: 'tier-10', bgClass: 'bg-t10', icon: '🏹', plus: '' }
+    ];
+
+    // Synthesis direct recipe:
+    // How to get tier[i]: { inputs: [ { tier, count, isSpecific } ] }
+    // As seen on the image:
+    // Green (1): 3x Gray (0) [all 3 identical specific]
+    // Blue (2): 3x Green (1) [all 3 identical]
+    // Purple (3): 3x Blue (2) [all 3 identical]
+    // Purple +1 (4): 1x Purple (3) [main] + 1x Purple (3) [fodder]
+    // Purple +2 (5): 1x Purple+1 (4) [main] + 2x Purple (3) [fodder]
+    // Gold (6): 2x Purple+2 (5) [both specific]
+    // Gold +1 (7): 1x Gold (6) [main] + 1x Gold (6) [fodder]
+    // Gold +2 (8): 1x Gold+1 (7) [main] + 1x Gold (6) [fodder]
+    // Gold +3 (9): 1x Gold+2 (8) [main] + 2x Gold (6) [fodder]
+    // Red (10): 2x Gold+3 (9) [both specific]
+
+    const RECIPES = {
+      1: [{ tier: 0, count: 3, specific: true }],
+      2: [{ tier: 1, count: 3, specific: true }],
+      3: [{ tier: 2, count: 3, specific: true }],
+      4: [{ tier: 3, count: 1, specific: true }, { tier: 3, count: 1, specific: false }],
+      5: [{ tier: 4, count: 1, specific: true }, { tier: 3, count: 2, specific: false }],
+      6: [{ tier: 5, count: 2, specific: true }],
+      7: [{ tier: 6, count: 1, specific: true }, { tier: 6, count: 1, specific: false }],
+      8: [{ tier: 7, count: 1, specific: true }, { tier: 6, count: 1, specific: false }],
+      9: [{ tier: 8, count: 1, specific: true }, { tier: 6, count: 2, specific: false }],
+      10: [{ tier: 9, count: 2, specific: true }]
+    };
+
+    let selectedTier = 9; // Default Gold +3
+
+    function initTiersGrid() {
+      const grid = document.getElementById('tiersGrid');
+      grid.innerHTML = '';
+      TIERS.forEach(t => {
+        const btn = document.createElement('div');
+        btn.className = `tier-btn ${t.id === selectedTier ? 'active' : ''}`;
+        btn.onclick = () => {
+          selectedTier = t.id;
+          document.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          updateCalc();
+        };
+
+        btn.innerHTML = `
+          <div class="badge-icon ${t.bgClass}">
+            ${t.icon}
+            ${t.plus ? `<span style="position:absolute; bottom:2px; right:4px; font-size:11px; background:rgba(0,0,0,0.6); padding:0 3px; border-radius:4px;">+${t.plus}</span>` : ''}
+          </div>
+          <div class="tier-name ${t.colorClass}">${t.name}</div>
+          <div class="tier-sub">${t.sub}</div>
+        `;
+        grid.appendChild(btn);
+      });
+    }
+
+    function changeQty(delta) {
+      const input = document.getElementById('qtyInput');
+      let val = Math.max(1, (parseInt(input.value) || 1) + delta);
+      input.value = val;
+      updateCalc();
+    }
+
+    // Calculate total base Gray value per single item of tier
+    const GRAY_MULT = {
+      0: 1,
+      1: 3,
+      2: 9,
+      3: 27,
+      4: 54,
+      5: 108,
+      6: 216,
+      7: 432,
+      8: 648,
+      9: 1080,
+      10: 2160
+    };
+
+    // Calculate detailed breakdown of specific vs fodder needed for 1 of targetTier
+    function computeDetailedBreakdown(targetTier, qty) {
+      // We can track counts for each tier: { specific: count, fodder: count }
+      const breakdown = {};
+      for (let i = 0; i <= targetTier; i++) {
+        breakdown[i] = { specific: 0, fodder: 0 };
+      }
+
+      function expand(tier, count, isSpecific) {
+        if (isSpecific) breakdown[tier].specific += count;
+        else breakdown[tier].fodder += count;
+
+        if (tier === 0) return;
+
+        const recipe = RECIPES[tier];
+        if (recipe) {
+          recipe.forEach(ing => {
+            // If parent was fodder, all children are technically fodder.
+            // If parent was specific, specific ingredients remain specific, fodder remain fodder.
+            const childSpecific = isSpecific ? ing.specific : false;
+            expand(ing.tier, ing.count * count, childSpecific);
+          });
+        }
+      }
+
+      expand(targetTier, qty, true);
+      return breakdown;
+    }
+
+    // Build immediate prerequisite recipe chain
+    function buildRecipeChain(targetTier, qty) {
+      const steps = [];
+      // Traverse down from targetTier to 1
+      // We calculate how many of each tier need to be crafted
+      const craftedCount = {};
+      craftedCount[targetTier] = qty;
+
+      for (let t = targetTier; t >= 1; t--) {
+        const countToCraft = craftedCount[t] || 0;
+        if (countToCraft > 0) {
+          const recipe = RECIPES[t];
+          steps.push({
+            resultTier: t,
+            count: countToCraft,
+            ingredients: recipe.map(ing => ({
+              tier: ing.tier,
+              count: ing.count * countToCraft,
+              perOne: ing.count,
+              specific: ing.specific
+            }))
+          });
+
+          // Propagate to ingredients
+          recipe.forEach(ing => {
+            craftedCount[ing.tier] = (craftedCount[ing.tier] || 0) + (ing.count * countToCraft);
+          });
+        }
+      }
+      return steps;
+    }
+
+    function updateCalc() {
+      const qty = Math.max(1, parseInt(document.getElementById('qtyInput').value) || 1);
+      const target = TIERS[selectedTier];
+
+      document.getElementById('quickInfo').innerHTML = 
+        `Ціль: <b class="${target.colorClass}">${qty}x ${target.name}</b>`;
+
+      const totalGray = GRAY_MULT[selectedTier] * qty;
+      const totalPurple = (totalGray / 27).toFixed(1).replace('.0', '');
+      const totalGold = (totalGray / 216).toFixed(2).replace('.00', '');
+
+      document.getElementById('statGray').innerText = totalGray.toLocaleString();
+      document.getElementById('statPurple').innerText = totalPurple;
+      document.getElementById('statGold').innerText = totalGold;
+
+      // 1. Build recipe chain
+      const chainContainer = document.getElementById('recipeChain');
+      chainContainer.innerHTML = '';
+
+      if (selectedTier === 0) {
+        chainContainer.innerHTML = '<div style="color:var(--text-muted); font-size:14px; text-align:center; padding:16px;">Сірий предмет є базовим і не потребує злиття.</div>';
+      } else {
+        const steps = buildRecipeChain(selectedTier, qty);
+        steps.forEach(step => {
+          const resTier = TIERS[step.resultTier];
+          const div = document.createElement('div');
+          div.className = 'recipe-step';
+
+          let partsHtml = step.ingredients.map(ing => {
+            const iTier = TIERS[ing.tier];
+            const badgeType = ing.specific 
+              ? `<span style="color:#ffd166; font-size:11px;">(той самий)</span>` 
+              : `<span style="color:var(--text-muted); font-size:11px;">(будь-який корм)</span>`;
+            return `
+              <span class="pill">
+                <span class="dot ${iTier.bgClass}"></span>
+                <b class="${iTier.colorClass}">${ing.count}x</b> ${iTier.name} ${badgeType}
+              </span>
+            `;
+          }).join('<span style="color:var(--text-muted); font-weight:700;">+</span>');
+
+          div.innerHTML = `
+            <div class="recipe-target">
+              <span class="pill ${resTier.bgClass}" style="color:#fff;">${step.count}x</span>
+              <span class="${resTier.colorClass}">${resTier.name}</span>
+            </div>
+            <div class="recipe-arrow">←</div>
+            <div class="recipe-parts">${partsHtml}</div>
+          `;
+          chainContainer.appendChild(div);
+        });
+      }
+
+      // 2. Build breakdown table
+      const detailed = computeDetailedBreakdown(selectedTier, qty);
+      const tbody = document.getElementById('breakdownTable');
+      tbody.innerHTML = '';
+
+      // Render from selectedTier down to 0
+      for (let t = selectedTier; t >= 0; t--) {
+        const item = TIERS[t];
+        const data = detailed[t];
+        const total = data.specific + data.fodder;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <span class="pill">
+              <span class="dot ${item.bgClass}"></span>
+              <b class="${item.colorClass}">${item.name}</b>
+              <span style="font-size:11px; color:var(--text-muted);">(${item.sub})</span>
+            </span>
+          </td>
+          <td style="color:#ffd166; font-weight:700;">${data.specific ? data.specific + ' шт.' : '-'}</td>
+          <td style="color:var(--text-muted);">${data.fodder ? data.fodder + ' шт.' : '-'}</td>
+          <td style="font-weight:800; font-size:15px;" class="${item.colorClass}">${total} шт.</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    initTiersGrid();
+    updateCalc();
+  </script>
+</body>
 </html>
