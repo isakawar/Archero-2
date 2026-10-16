@@ -228,6 +228,28 @@
     .need-alts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
     .need-unit { margin-left: 2px; font-size: 14px; font-weight: 800; color: var(--muted); }
     .need-alts .need-num { margin-right: 4px; }
+    .shop { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .shop-row {
+      display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 14px;
+      background: #fff; border: 2px solid #eadcbf;
+    }
+    .shop-row.ok { opacity: .55; }
+    .shop-num { font-family: var(--lf); font-size: 34px; line-height: 1; min-width: 52px; color: var(--ink); }
+    .shop-row.ok .shop-num { color: #1f8a39; }
+    .shop-text { display: flex; flex-direction: column; min-width: 0; }
+    .shop-text b { font-size: 16px; font-weight: 900; }
+    .shop-text small { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .shop-gap { margin: 2px 0 0; font-size: 14px; font-weight: 700; color: var(--muted); line-height: 2; }
+    .gap-chip { display: inline-flex; align-items: center; gap: 6px; font-weight: 900; color: var(--ink); vertical-align: middle; }
+    .seg-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: var(--muted); }
+    .seg {
+      border: 2px solid #d6c39b; background: #fff; border-radius: 10px; padding: 6px 10px; min-height: 36px;
+      font-size: 13px; font-weight: 900; color: #6b5a3e;
+    }
+    .seg[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .path li.fold { background: transparent; border: 0; padding: 0; }
+    .path li.fold .more { color: var(--gold-text); border-color: #4a5786; }
+    .path li.fold .more:hover { background: #16203b; }
     .op-dark { color: var(--muted); font-size: 20px; }
     .alt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; width: 100%; }
     .alt {
@@ -567,7 +589,7 @@
     }
 
     // UI-only state (not saved): expanded lists, rows touched this session, opened card details
-    const ui = { allLevels: false, low: false, touched: new Set(), info: null };
+    const ui = { allLevels: false, low: false, touched: new Set(), info: null, unit: 'fod', steps: false };
     const NEAREST = 3; // levels right below the target that are always visible
 
     function toggleBtn(action, text) {
@@ -617,7 +639,8 @@
       const byId = Object.fromEntries(m.levels.map(l => [l.id, l]));
       const b = bump ? ' bump' : '';
 
-      let needs, pct, done, mbar, lowSteps = [];
+      let needs, pct, done, mbar, lowSteps = [], foldBelow = -1;
+      const done0 = (...xs) => xs.every(x => !x);
       if (mode === 'gear') {
         const fod = state.fod;
         const lowGrey = LOW.reduce((a, l) => a + fod[l.id] * l.w, 0);
@@ -633,38 +656,36 @@
         // epic fodder still to build (for both fodder kinds) and its cost in grey items
         const epicToBuild = Math.max(0, res.ef + lfShort * 8 - fod.ef);
         const greyLeft = Math.max(0, epicToBuild * GREY_PER_EPIC - lowGrey);
-        const gaps = [needEF && needEF + ' епічних', needLF && needLF + ' легендарних'].filter(Boolean).join(' і ');
         const lfHave = Math.min(fod.lf, res.lf);
         const pieces = missingPieces(m.recipes, target.id, state.inv.gear);
         const gapLv = m.levels.slice().reverse().filter(lv => pieces[lv.id]);
-        needs = [
-          gapLv.length && { id: 'sgap', wide: true, label: 'Ще не вистачає S-предметів',
-            html: gapLv.map(lv => `<span class="need-val">${T(lv, 44)}<span class="need-num${b}" style="--nc:${FR[lv.r].d}">${pieces[lv.id]}</span></span><span class="need-unit">${lv.label}</span>`)
-              .join('<span class="op op-dark">+</span>'),
-            sub: 'дістань готовими або збери — що для цього треба, нижче',
-            more: [['Що це', 'найбільші частини злиття, яких немає в інвентарі'],
-              ['Копій S для них і решти', res.base], ['Злиттів до цілі', Object.values(res.merges).reduce((a, v) => a + v, 0)]] },
-          { id: 'copies', label: 'Копій S-предмета', value: res.base, color: FR.E.d, icon: tile('gear', GEAR[0], 40),
-            sub: full.base > res.base ? `з ${full.base} · решта вже є` : 'той самий предмет',
-            more: [['Всього з нуля', full.base], ['Вже є в інвентарі', full.base - res.base],
-              ['Що це', 'епічні копії саме цього S-предмета']] },
-          full.lf && { id: 'lf', label: 'Легендарний фураж', value: needLF, color: FR.L.d, icon: tile('fodder', FOD.L, 40),
-            sub: needLF ? '= ' + fmt(epicForLF) + ' епічних' : 'з ' + res.lf,
-            more: [['Потрібно для злиття', res.lf], ['Є легендарного фуражу', lfHave],
-              lfFromSpare && ['Зі зайвих епічних', lfFromSpare], ['1 легендарний', '8 епічних']] },
-          { id: 'ef', label: 'Епічний фураж', value: needEF, color: FR.E.d, icon: tile('fodder', FOD.E, 40),
-            sub: 'з ' + res.ef,
-            more: [['Потрібно для злиття', res.ef], ['Є епічного фуражу', fod.ef],
-              fromLow && ['З нижчих предметів', fromLow],
-              lfFromSpare && ['Зайві → на легендарний', lfFromSpare * 8]] },
-          greyLeft && {
-            id: 'low', wide: true, label: 'Або з нижчих предметів',
-            html: LOW.map(l => `<span class="need-val">${tile('item', l, 40)}<span class="need-num${b}" style="--nc:${FR[l.r].d}">${fmt(Math.ceil(greyLeft / l.w))}</span><span class="need-unit">${l.many}</span></span>`)
-              .join('<span class="need-or">або</span>'),
-            sub: 'на вибір, щоб закрити фураж',
-            more: [['Закриває', (gaps || 'фураж') + ' фуражу'], ['Курс', '1 епічний = 3 синіх = 9 зелених = 27 сірих'],
-              ['Враховано', 'фураж і нижчі предмети з інвентарю']] }
-        ].filter(Boolean);
+        const low = LOW.find(l => l.id === ui.unit);
+        const row = (icon, n, title, note) => `<div class="shop-row${n ? '' : ' ok'}">
+            ${icon}<span class="shop-num${b}">${n ? fmt(n) : '✓'}</span>
+            <span class="shop-text"><b>${title}</b><small>${n ? note : 'вистачає'}</small></span>
+          </div>`;
+        const rows = [
+          row(tile('gear', GEAR[0], 44), res.base, 'копій цього S-предмета', 'епічні, саме цей предмет'),
+          ...(low
+            ? [(full.ef || full.lf) && row(tile('item', low, 44), Math.ceil(greyLeft / low.w), low.many + ' предметів на фураж',
+                'замість ' + [needLF && needLF + ' легендарного', needEF && needEF + ' епічного'].filter(Boolean).join(' і ') + ' фуражу')]
+            : [full.lf && row(tile('fodder', FOD.L, 44), needLF, 'легендарного фуражу', 'будь-які легендарні предмети'),
+               full.ef && row(tile('fodder', FOD.E, 44), needEF, 'епічного фуражу', 'будь-які епічні предмети')])
+        ].filter(Boolean).join('');
+        const units = [['fod', 'фуражі'], ...LOW.map(l => [l.id, l.many])]
+          .map(([k, t]) => `<button class="seg btn" data-unit="${k}" aria-pressed="${(ui.unit || 'fod') === k}">${t}</button>`).join('');
+        const gapLine = gapLv.length
+          ? `<p class="shop-gap">тобто бракує ${gapLv.map(lv => `<span class="gap-chip">${T(lv, 26)}${pieces[lv.id]}× ${lv.label}</span>`).join(' + ')}</p>` : '';
+        needs = done0(res.base, needEF, needLF) ? [] : [{
+          id: 'shop', wide: true, label: 'Що ще знайти',
+          html: `<div class="shop">${rows}${gapLine}<div class="seg-wrap"><span>Фураж рахувати в:</span>${units}</div></div>`,
+          sub: '',
+          more: [['Копій з нуля', full.base], ['Копій уже є', full.base - res.base],
+            ['Епічного фуражу потрібно', res.ef], ['Є епічного', fod.ef], fromLow && ['Епічного з нижчих', fromLow],
+            full.lf && ['Легендарного потрібно', res.lf], full.lf && ['Є легендарного', lfHave],
+            lfFromSpare && ['Легендарного зі зайвих епічних', lfFromSpare],
+            ['Курс', '1 легендарний = 8 епічних; 1 епічний = 3 синіх = 9 зелених = 27 сірих']]
+        }];
         lowSteps = lowChain(epicToBuild, fod);
         if (lfShort) {
           lowSteps.push({
@@ -707,6 +728,7 @@
         pct = full.base ? Math.round((1 - res.base / full.base) * 100) : 100;
         done = res.base === 0;
         mbar = gap.length ? 'Ще ' + gap.map(g => g.n + '× ' + g.lv.id).join(' + ') : '';
+        foldBelow = gap.length ? m.levels.indexOf(gap[gap.length - 1].lv) : -1;
       }
       pct = Math.max(0, Math.min(100, pct));
       if (done) mbar = 'Готово до злиття!';
@@ -716,15 +738,23 @@
         const parts = r.parts.map(pid => T(byId[pid], 38));
         for (let i = 0; i < (r.ef || 0); i++) parts.push(tile('fodder', FOD.E, 38));
         for (let i = 0; i < (r.lf || 0); i++) parts.push(tile('fodder', FOD.L, 38));
-        return { times: res.merges[lv.id], parts, result: T(lv, 44), label: lv.label };
+        return { id: lv.id, times: res.merges[lv.id], parts, result: T(lv, 44), label: lv.label };
       });
-      const steps = [...lowSteps, ...mainSteps].map(s => `<li>
+      // helper steps (fodder crafting, building missing runes from scratch) are folded by default
+      const hiddenSteps = mode === 'gear' ? lowSteps : mainSteps.filter((_, i) => m.levels.indexOf(byId[mainSteps[i].id]) <= foldBelow);
+      const shownSteps = mode === 'gear' ? mainSteps : mainSteps.filter(st => !hiddenSteps.includes(st));
+      const foldLabel = mode === 'gear' ? 'виготовлення фуражу з нижчих предметів' : 'як зібрати бракуючі руни з нижчих';
+      const stepLi = s => `<li>
           <span class="times${b}">×${fmt(s.times)}</span>
           ${s.parts.join('<span class="op" aria-hidden="true">+</span>')}
           <span class="op" aria-hidden="true" style="margin:0 2px">=</span>
           ${s.result}
           <span class="step-label">${s.label}</span>
-        </li>`).join('');
+        </li>`;
+      const steps = (hiddenSteps.length
+        ? `<li class="fold"><button class="more btn" data-action="steps">${ui.steps ? 'Сховати' : 'Показати'} ${foldLabel} · ${hiddenSteps.length}</button></li>` +
+          (ui.steps ? hiddenSteps.map(stepLi).join('') : '')
+        : '') + shownSteps.map(stepLi).join('');
 
       const el = $('result');
       el.style.setProperty('--rb', c.b);
@@ -802,7 +832,7 @@
     }
 
     document.addEventListener('click', e => {
-      const t = e.target.closest('[data-mode],[data-target],[data-step],[data-action],[data-info]');
+      const t = e.target.closest('[data-mode],[data-target],[data-step],[data-action],[data-info],[data-unit]');
       if (!t) return;
       if (t.dataset.mode) {
         if (state.mode === t.dataset.mode) return;
@@ -832,6 +862,12 @@
       } else if (t.dataset.action === 'low') {
         ui.low = !ui.low;
         renderInv(false);
+      } else if (t.dataset.action === 'steps') {
+        ui.steps = !ui.steps;
+        renderResult(false);
+      } else if (t.dataset.unit) {
+        ui.unit = t.dataset.unit;
+        renderResult(false);
       } else if (t.dataset.info) {
         ui.info = ui.info === t.dataset.info ? null : t.dataset.info;
         renderResult(false);
